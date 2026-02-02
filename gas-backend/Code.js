@@ -201,7 +201,10 @@ function handleGetUserInfo() {
 
     return createJsonResponse({
       success: true,
-      data: userInfo,
+      data: {
+        ...userInfo,
+        sheetUrl: getUserSheetUrl()
+      },
     });
   } catch (error) {
     Logger.log("handleGetUserInfo error: " + error.toString());

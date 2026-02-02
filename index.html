@@ -173,9 +173,14 @@
             <div id="userInfo" class="login-info" style="display: none;">
                 <h4>Selamat datang!</h4>
                 <p class="user-email" id="userEmail">-</p>
-                <span class="privacy-badge">
-                    <span>🔒</span> Data tersimpan di Drive Anda
-                </span>
+                <div class="flex flex-wrap gap-2 mt-2">
+                    <span class="privacy-badge">
+                        <span>🔒</span> Data tersimpan di Drive Anda
+                    </span>
+                    <a id="openSheetButton" href="#" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-semibold flex items-center transition" style="display: none;">
+                        <span>📊</span> &nbsp; Buka Google Sheets
+                    </a>
+                </div>
             </div>
             
             <!-- Login/Logout button -->

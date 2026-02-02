@@ -106,6 +106,9 @@ function handleLogout() {
   document.getElementById("loginButton").style.display = "inline-block";
   document.getElementById("logoutButton").style.display = "none";
   document.getElementById("saveSection").classList.remove("active");
+  
+  const openSheetBtn = document.getElementById("openSheetButton");
+  if (openSheetBtn) openSheetBtn.style.display = "none";
 
   showNotification(CONFIG.MSG.LOGOUT_SUCCESS, "info");
 }
@@ -119,6 +122,13 @@ function displayUserInfo(userInfo) {
   document.getElementById("userEmail").textContent = userInfo.email;
   document.getElementById("loginButton").style.display = "none";
   document.getElementById("logoutButton").style.display = "inline-block";
+
+  // Handle Google Sheet Button
+  const openSheetBtn = document.getElementById("openSheetButton");
+  if (openSheetBtn && userInfo.sheetUrl) {
+    openSheetBtn.href = userInfo.sheetUrl;
+    openSheetBtn.style.display = "flex";
+  }
 
   // Show save section if calculation has results
   const qult = document.getElementById("hasilQult");
