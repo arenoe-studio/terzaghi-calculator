@@ -409,24 +409,60 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-/**
- * Update showLoading implementation
- * (Overrides placeholder from index.html)
- */
-function showLoading(show) {
-  const overlay = document.getElementById("loadingOverlay");
-  if (overlay) {
-    if (show) {
-      overlay.classList.add("active");
-    } else {
-      overlay.classList.remove("active");
-    }
-  }
-}
-
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
+
+/**
+ * Check if we can show the save section
+ */
+function checkForSaveCondition() {
+  const userEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
+  const qultElement = document.getElementById("hasilQult");
+  const qultVal = qultElement ? qultElement.textContent : "";
+  
+  console.log(`[SaveCheck] User: ${userEmail ? 'Logged In' : 'Guest'}, Result: ${qultVal}`);
+  
+  if (userEmail && qultVal && qultVal !== "-") {
+    document.getElementById("saveSection").classList.add("active");
+    console.log("[SaveCheck] ✅ Save section ACTIVATED");
+  } else {
+    // Debug info why it's not showing
+    if (!userEmail) console.log("[SaveCheck] ❌ Not showing save: User not logged in");
+    else if (!qultVal || qultVal === "-") console.log("[SaveCheck] ❌ Not showing save: No result value");
+  }
+}
+
+/**
+ * Wrap the calculator function to inject our logic
+ */
+function wrapCalculatorFunction() {
+  if (typeof window.hitungDayaDukung === 'function' && !window.hitungDayaDukung.isWrapped) {
+    console.log("[Init] Wrapping hitungDayaDukung function...");
+    
+    const originalFunction = window.hitungDayaDukung;
+    
+    window.hitungDayaDukung = function() {
+      console.log("[Calc] Intercepted calculation call");
+      
+      // 1. Call Original
+      try {
+        originalFunction.apply(this, arguments);
+        console.log("[Calc] Original calculation executed");
+      } catch (error) {
+        console.error("[Calc] Error in original calculation:", error);
+      }
+      
+      // 2. Run our check
+      setTimeout(checkForSaveCondition, 100); // Short delay to allow DOM to update
+    };
+    
+    window.hitungDayaDukung.isWrapped = true;
+    console.log("[Init] Wrapper applied successfully");
+  } else {
+    console.log("[Init] hitungDayaDukung not found or already wrapped");
+  }
+}
 
 /**
  * Page initialization
@@ -449,58 +485,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
-  // Hook into hitungDayaDukung (Wait a bit to ensure calculator.js loaded)
-  // We use direct ID attachment for safety
-  setTimeout(() => {
-    const calcBtn = document.querySelector(".calculate-button");
-    if (calcBtn) {
-      console.log("save-features.js: Found calculate button. Attaching wrapped handler.");
-      // We overwrite the onclick attribute to intercept it
-      // Note: original hitungDayaDukung is globally available
-      
-      const wrappedHitung = function() {
-        console.log("save-features.js: Wrapped hitungDayaDukung triggered");
-        
-        // 1. Run original calculation
-        if (typeof hitungDayaDukung === "function") {
-          try {
-            hitungDayaDukung();
-            console.log("save-features.js: Original calculation finished");
-          } catch (e) {
-            console.error("save-features.js: Error in original calculation:", e);
-          }
-        } else {
-          console.error("save-features.js: hitungDayaDukung function not found!");
-        }
-
-        // 2. Show save section check
-        const userEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
-        const qultElement = document.getElementById("hasilQult");
-        const qultText = qultElement ? qultElement.textContent : "";
-        
-        console.log("save-features.js: Post-calc check:", {
-          userEmail: userEmail,
-          qultText: qultText,
-          hasValue: qultText && qultText !== "-"
-        });
-
-        if (
-          userEmail &&
-          qultElement &&
-          qultText &&
-          qultText !== "-"
-        ) {
-          console.log("save-features.js: Showing save section");
-          document.getElementById("saveSection").classList.add("active");
-        } else {
-            console.log("save-features.js: Save section conditions not met");
-        }
-      };
-
-      // Handle both onclick attribute and addEventListener
-      calcBtn.onclick = wrappedHitung;
-    } else {
-      console.error("save-features.js: Calculate button not found!");
-    }
-  }, 500); // 500ms delay to be safe
+  // Attempt to wrap immediately, and retry after a delay to be safe
+  wrapCalculatorFunction();
+  setTimeout(wrapCalculatorFunction, 1000);
 });
