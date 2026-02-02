@@ -49,28 +49,46 @@ function toggleSaveFeature() {
  */
 async function loginWithGoogle() {
   try {
-    showLoading(true);
+    showNotification("Membuka jendela login Google...", "info");
+    
+    // Open backend URL in a popup
+    const width = 600, height = 700;
+    const left = (window.innerWidth / 2) - (width / 2);
+    const top = (window.innerHeight / 2) - (height / 2);
+    
+    const loginWindow = window.open(
+        CONFIG.BACKEND_URL, 
+        'GoogleLogin', 
+        `width=${width},height=${height},left=${left},top=${top}`
+    );
 
-    // Call backend GET_USER_INFO - ini akan trigger OAuth jika belum login
-    const response = await apiCall(CONFIG.API.GET_USER_INFO);
+    // Poll for window closure
+    const timer = setInterval(async () => {
+        if (!loginWindow || loginWindow.closed) {
+            clearInterval(timer);
+            showLoading(true);
+            try {
+                // Verify status after login window closed
+                const response = await apiCall(CONFIG.API.GET_USER_INFO);
+                if (response.success && response.data.authenticated) {
+                    Storage.set(CONFIG.STORAGE_KEY_USER_EMAIL, response.data.email);
+                    Storage.set(CONFIG.STORAGE_KEY_USER_NAME, response.data.name);
+                    displayUserInfo(response.data);
+                    showNotification(CONFIG.MSG.LOGIN_SUCCESS, "success");
+                } else {
+                    showNotification("Login belum selesai atau gagal.", "warning");
+                }
+            } catch (error) {
+                console.error("Post-login status check error:", error);
+            }
+            showLoading(false);
+        }
+    }, 1000);
 
-    if (response.success && response.data.authenticated) {
-      // Save user info to localStorage
-      Storage.set(CONFIG.STORAGE_KEY_USER_EMAIL, response.data.email);
-      Storage.set(CONFIG.STORAGE_KEY_USER_NAME, response.data.name);
-
-      // Update UI
-      displayUserInfo(response.data);
-      showNotification(CONFIG.MSG.LOGIN_SUCCESS, "success");
-    } else {
-      showNotification(CONFIG.MSG.LOGIN_REQUIRED, "warning");
-    }
-
-    showLoading(false);
   } catch (error) {
     showLoading(false);
-    console.error("Login error:", error);
-    showNotification("Login gagal: " + error.message, "error");
+    console.error("Login trigger error:", error);
+    showNotification("Login gagal dipicu: " + error.message, "error");
   }
 }
 

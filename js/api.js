@@ -12,19 +12,28 @@ async function apiCall(actionParam, options = {}) {
     
     const defaultOptions = {
         method: 'GET',
-        mode: 'cors', // Important for GAS
-        credentials: 'omit',
-        headers: {
-            'Content-Type': 'text/plain;charset=utf-8', // GAS often works better with text/plain for CORS
-        }
+        mode: 'cors', 
+        redirect: 'follow', // Crucial for GAS Web App redirects
+        credentials: 'omit' // GAS does not allow 'include' for CORS from different origin
     };
+    
+    // Only add headers if method is POST
+    if (options.method === 'POST') {
+        defaultOptions.headers = {
+            'Content-Type': 'text/plain;charset=utf-8' // Simple request avoids preflight
+        };
+    }
     
     const fetchOptions = { ...defaultOptions, ...options };
     
     try {
         const response = await fetch(url, fetchOptions);
         
+        // Handle opaque responses or empty bodies
         if (!response.ok) {
+            if (response.status === 0) {
+                throw new Error('Network error or CORS block. Are you logged in to Google?');
+            }
             throw new Error(`HTTP Error: ${response.status}`);
         }
         
