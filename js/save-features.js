@@ -433,6 +433,8 @@ function showLoading(show) {
  * Run when DOM is ready
  */
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("save-features.js: DOMContentLoaded");
+
   // Always check auth status on load
   checkAuthStatus();
 
@@ -447,24 +449,58 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
-  // Hook into hitungDayaDukung to show save section after calculation
-  if (typeof hitungDayaDukung !== "undefined") {
-    const originalHitungDayaDukung = hitungDayaDukung;
-    window.hitungDayaDukung = function () {
-      originalHitungDayaDukung.apply(this, arguments);
+  // Hook into hitungDayaDukung (Wait a bit to ensure calculator.js loaded)
+  // We use direct ID attachment for safety
+  setTimeout(() => {
+    const calcBtn = document.querySelector(".calculate-button");
+    if (calcBtn) {
+      console.log("save-features.js: Found calculate button. Attaching wrapped handler.");
+      // We overwrite the onclick attribute to intercept it
+      // Note: original hitungDayaDukung is globally available
+      
+      const wrappedHitung = function() {
+        console.log("save-features.js: Wrapped hitungDayaDukung triggered");
+        
+        // 1. Run original calculation
+        if (typeof hitungDayaDukung === "function") {
+          try {
+            hitungDayaDukung();
+            console.log("save-features.js: Original calculation finished");
+          } catch (e) {
+            console.error("save-features.js: Error in original calculation:", e);
+          }
+        } else {
+          console.error("save-features.js: hitungDayaDukung function not found!");
+        }
 
-      //After calculation, show save section if logged in
-      const userEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
-      const qultElement = document.getElementById("hasilQult");
+        // 2. Show save section check
+        const userEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
+        const qultElement = document.getElementById("hasilQult");
+        const qultText = qultElement ? qultElement.textContent : "";
+        
+        console.log("save-features.js: Post-calc check:", {
+          userEmail: userEmail,
+          qultText: qultText,
+          hasValue: qultText && qultText !== "-"
+        });
 
-      if (
-        userEmail &&
-        qultElement &&
-        qultElement.textContent &&
-        qultElement.textContent !== "-"
-      ) {
-        document.getElementById("saveSection").classList.add("active");
-      }
-    };
-  }
+        if (
+          userEmail &&
+          qultElement &&
+          qultText &&
+          qultText !== "-"
+        ) {
+          console.log("save-features.js: Showing save section");
+          document.getElementById("saveSection").classList.add("active");
+        } else {
+            console.log("save-features.js: Save section conditions not met");
+        }
+      };
+
+      // Handle both onclick attribute and addEventListener
+      calcBtn.onclick = wrappedHitung;
+    } else {
+      console.error("save-features.js: Calculate button not found!");
+    }
+  }, 500); // 500ms delay to be safe
 });
