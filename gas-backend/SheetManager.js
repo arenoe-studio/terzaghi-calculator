@@ -85,19 +85,35 @@ function getOrCreateUserSheet() {
  * @param {string} sheetName - Nama sheet yang dicari
  * @returns {Spreadsheet|null} Spreadsheet object atau null jika tidak ketemu
  */
+/**
+ * Find spreadsheet by name di Drive user
+ *
+ * Note: Karena scope drive.file, hanya bisa cari file yang dibuat oleh app ini
+ *
+ * @param {string} sheetName - Nama sheet yang dicari
+ * @returns {Spreadsheet|null} Spreadsheet object atau null jika tidak ketemu
+ */
 function findSpreadsheetByName(sheetName) {
   try {
+    // Note: getFilesByName only returns exact matches
     const files = DriveApp.getFilesByName(sheetName);
 
     while (files.hasNext()) {
       const file = files.next();
 
+      // Skip if file is in trash
+      if (file.isTrashed()) {
+        continue;
+      }
+
       // Check if it's a spreadsheet
       if (file.getMimeType() === MimeType.GOOGLE_SHEETS) {
+        Logger.log("Found existing spreadsheet: " + file.getName() + " (ID: " + file.getId() + ")");
         return SpreadsheetApp.openById(file.getId());
       }
     }
-
+    
+    Logger.log("No existing non-trashed spreadsheet found with name: " + sheetName);
     return null;
   } catch (error) {
     Logger.log("findSpreadsheetByName error: " + error.toString());
