@@ -783,6 +783,7 @@ input:checked + .toggle-slider:before {
     min-width: 80px;
     background-color: #f8f9fa;
     cursor: pointer;
+    font-size: 0.85rem; /* Match unit-text font size */
 }
 
 /* Responsive Adjustments */

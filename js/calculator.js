@@ -263,9 +263,17 @@ function hitungDayaDukung() {
     const gamma_sat = isMAT ? toBaseUnit(gamma_sat_raw, 'density', unit_gammaSat) : 0;
     const gamma_w = isMAT ? toBaseUnit(gamma_w_raw, 'density', unit_gammaAir) : 0;
     
-    const B_cm = B_m_input * 100; // m to cm
-    const Df_cm = Df_m_input * 100; // m to cm
-    const Dw_cm = isMAT ? Dw_m_input * 100 : null; // m to cm
+    // Get length units
+    const unit_B = getSelectedUnit('unit_lebarPondasi');
+    const unit_Df = getSelectedUnit('unit_kedalamanPondasi');
+    const unit_Dw = getSelectedUnit('unit_kedalamanMAT');
+
+    const toCm = (val, unit) => unit === 'm' ? val * 100 : val;
+
+    const B_cm = toCm(B_m_input, unit_B); 
+    const Df_cm = toCm(Df_m_input, unit_Df);
+    const Dw_cm = isMAT ? toCm(Dw_m_input, unit_Dw) : null;
+    
     const phi = phi_input;
     const SF = SF_input;
 
@@ -416,7 +424,120 @@ function hitungDayaDukung() {
     // FIXED: Use parentElement
     document.getElementById('hasilQall').parentElement.nextElementSibling.textContent = outputStressLabel;
 
-    // Tampilkan Formula
+    // Display Formula
     document.getElementById('formulaText').innerHTML = formulaString;
     document.getElementById('formulaDisplayContainer').style.display = 'block';
 }
+
+// ============================================================================
+// UNIT SYNCHRONIZATION
+// ============================================================================
+
+// Map related units
+const UNIT_GROUPS = {
+    stress: ['unit_kohesi'],
+    density: ['unit_gammaTanah', 'unit_gammaSat', 'unit_gammaAir'],
+    length: ['unit_lebarPondasi', 'unit_kedalamanPondasi', 'unit_kedalamanMAT']
+};
+
+// Standard pairs (if user selects kg/cm2, what should other units be?)
+const UNIT_PAIRS = {
+    'kgcm2': { density: 'kgcm3', length: 'cm' },
+    'tonm2': { density: 'tonm3', length: 'm' },
+    'knm2': { density: 'knm3', length: 'm' }
+};
+
+// Placeholders for different units
+const PLACEHOLDERS = {
+    'kgcm2': { kohesi: '0.1', gamma: '0.0018', B: '150', Df: '100', Dw: '200' },
+    'tonm2': { kohesi: '1.0', gamma: '1.8', B: '1.5', Df: '1.0', Dw: '2.0' },
+    'knm2': { kohesi: '10', gamma: '18', B: '1.5', Df: '1.0', Dw: '2.0' },
+    'm': { B: '1.5', Df: '1.0', Dw: '2.0' },
+    'cm': { B: '150', Df: '100', Dw: '200' }
+};
+
+/**
+ * Update all units based on the primary unit change
+ */
+function updateAllUnits(triggerId) {
+    const triggerValue = document.getElementById(triggerId).value;
+    
+    // logic based on which type triggered the change
+    let targetStress = '';
+    let targetDensity = '';
+    let targetLength = '';
+    
+    // Helper to find key by value in pairs
+    const findStressByDensity = (val) => Object.keys(UNIT_PAIRS).find(k => UNIT_PAIRS[k].density === val);
+
+    if (triggerId === 'unit_kohesi') { // Stress triggered
+        if (UNIT_PAIRS[triggerValue]) {
+            targetDensity = UNIT_PAIRS[triggerValue].density;
+            targetLength = UNIT_PAIRS[triggerValue].length;
+            targetStress = triggerValue;
+        }
+    } else if (['unit_gammaTanah', 'unit_gammaSat', 'unit_gammaAir'].includes(triggerId)) { // Density triggered
+        const stress = findStressByDensity(triggerValue);
+        if (stress) {
+            targetStress = stress;
+            targetDensity = triggerValue;
+            targetLength = UNIT_PAIRS[stress].length;
+        }
+    }
+
+    // Apply changes
+    if (targetStress) {
+        document.getElementById('unit_kohesi').value = targetStress;
+    }
+    if (targetDensity) {
+        UNIT_GROUPS.density.forEach(id => {
+             document.getElementById(id).value = targetDensity;
+        });
+    }
+    if (targetLength) {
+        UNIT_GROUPS.length.forEach(id => {
+            document.getElementById(id).value = targetLength;
+        });
+    }
+    
+    updatePlaceholders();
+}
+
+function updatePlaceholders() {
+    // Get current units
+    const stressUnit = document.getElementById('unit_kohesi').value;
+    const lengthUnit = document.getElementById('unit_lebarPondasi').value;
+    
+    if (PLACEHOLDERS[stressUnit]) {
+        document.getElementById('kohesi').placeholder = `e.g., ${PLACEHOLDERS[stressUnit].kohesi}`;
+        document.getElementById('gammaTanah').placeholder = `e.g., ${PLACEHOLDERS[stressUnit].gamma}`;
+        document.getElementById('gammaSat').placeholder = `e.g., ${PLACEHOLDERS[stressUnit].gamma}`; // use same as gamma
+        // gammaAir is usually fixed/auto-filled but update if needed
+    }
+    
+    if (PLACEHOLDERS[lengthUnit]) {
+        document.getElementById('lebarPondasi').placeholder = `e.g., ${PLACEHOLDERS[lengthUnit].B}`;
+        document.getElementById('kedalamanPondasi').placeholder = `e.g., ${PLACEHOLDERS[lengthUnit].Df}`;
+        document.getElementById('kedalamanMAT').placeholder = `e.g., ${PLACEHOLDERS[lengthUnit].Dw} ...`;
+    }
+}
+
+// Add Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const allUnitSelects = [
+        ...UNIT_GROUPS.stress, 
+        ...UNIT_GROUPS.density
+        // Length units usually follow stress/density, but if changed manually, maybe stick? 
+        // For now, let's sync everything to stress/density changes.
+    ];
+
+    allUnitSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.addEventListener('change', () => updateAllUnits(id));
+        }
+    });
+    
+    // Initialize Placeholders
+    updatePlaceholders();
+});

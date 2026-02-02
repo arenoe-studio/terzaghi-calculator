@@ -113,14 +113,20 @@
             <label for="lebarPondasi">Lebar/Diameter Pondasi (B):</label>
             <div class="flex items-center">
                 <input type="number" id="lebarPondasi" step="any" class="input-field" placeholder="e.g., 1.5">
-                <span class="unit-text">meter</span>
+                <select id="unit_lebarPondasi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="m">meter</option>
+                    <option value="cm">cm</option>
+                </select>
             </div>
         </div>
         <div class="input-group">
             <label for="kedalamanPondasi">Kedalaman Dasar Pondasi (Df):</label>
             <div class="flex items-center">
                 <input type="number" id="kedalamanPondasi" step="any" class="input-field" placeholder="e.g., 1.0">
-                <span class="unit-text">meter</span>
+                <select id="unit_kedalamanPondasi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="m">meter</option>
+                    <option value="cm">cm</option>
+                </select>
             </div>
         </div>
         <div class="input-group">
@@ -137,7 +143,10 @@
             <label for="kedalamanMAT">Kedalaman MAT dari Permukaan (Dw):</label>
             <div class="flex items-center">
                 <input type="number" id="kedalamanMAT" step="any" class="input-field" placeholder="e.g., 2.0 atau kosong jika tidak ada pengaruh MAT">
-                <span class="unit-text">meter</span>
+                <select id="unit_kedalamanMAT" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="m">meter</option>
+                    <option value="cm">cm</option>
+                </select>
             </div>
         </div>
         <div class="input-group">
@@ -327,6 +336,7 @@
 
 <!-- External JavaScript -->
 <script src="js/config.js"></script>
+<script src="js/api.js"></script>
 <script src="js/calculator.js"></script>
 <script src="js/save-features.js"></script>
 
