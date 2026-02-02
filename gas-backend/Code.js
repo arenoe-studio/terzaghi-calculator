@@ -189,11 +189,12 @@ function doPost(e) {
  */
 function handleLogin() {
   const userInfo = getCurrentUserInfo();
+  const sheetUrl = getUserSheetUrl();
   const data = JSON.stringify({
     success: true,
     data: {
       ...userInfo,
-      sheetUrl: getUserSheetUrl()
+      sheetUrl: sheetUrl || ""
     }
   });
 
@@ -250,11 +251,14 @@ function handleGetUserInfo() {
       );
     }
 
+    const sheetUrl = getUserSheetUrl();
+    Logger.log("Returning user info for " + userInfo.email + " with sheetUrl: " + sheetUrl);
+
     return createJsonResponse({
       success: true,
       data: {
         ...userInfo,
-        sheetUrl: getUserSheetUrl()
+        sheetUrl: sheetUrl || "" 
       },
     });
   } catch (error) {

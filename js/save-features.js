@@ -144,9 +144,13 @@ function displayUserInfo(userInfo) {
 
   // Handle Google Sheet Button
   const openSheetBtn = document.getElementById("openSheetButton");
-  if (openSheetBtn && userInfo.sheetUrl) {
-    openSheetBtn.href = userInfo.sheetUrl;
-    openSheetBtn.style.display = "flex";
+  if (openSheetBtn) {
+    if (userInfo.sheetUrl && userInfo.sheetUrl !== "") {
+      openSheetBtn.href = userInfo.sheetUrl;
+      openSheetBtn.style.setProperty("display", "flex", "important");
+    } else {
+      openSheetBtn.style.display = "none";
+    }
   }
 
   // Show save section if calculation has results
@@ -166,16 +170,26 @@ async function checkAuthStatus() {
   const savedName = Storage.get(CONFIG.STORAGE_KEY_USER_NAME);
 
   if (savedEmail) {
-    // Assume still logged in, display cached info
+    // 1. Initial display with cached data (to feel fast)
     displayUserInfo({
       email: savedEmail,
       name: savedName || "User",
-      authenticated: true,
-      // We don't have sheetUrl here, but it will be updated if they save or re-login
+      authenticated: true
     });
 
-    // Verification via Fetch is unreliable cross-origin without tokens
-    // So we primarily rely on the LocalStorage session for UI state
+    // 2. Fetch full info (including sheetUrl) in background
+    try {
+      const response = await apiCall(CONFIG.API.GET_USER_INFO);
+      if (response.success && response.data.authenticated) {
+        // Update with fresh data (this will show the sheet button if available)
+        displayUserInfo(response.data);
+      } else {
+        // Session might have expired on server side
+        handleLogout();
+      }
+    } catch (error) {
+      console.log("Could not refresh user info from server:", error);
+    }
   }
 }
 
