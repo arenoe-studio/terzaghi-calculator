@@ -34,41 +34,40 @@
  */
 function getOrCreateUserSheet() {
   try {
-    // Get user email untuk identifikasi
     const userEmail = getCurrentUserEmail();
-
     if (!userEmail) {
-      throw new Error("User not authenticated");
+      Logger.log("getOrCreateUserSheet: No user email found");
+      return null;
     }
 
-    // Construct sheet name
     const sheetName = CONFIG.SHEET_NAME_PREFIX + userEmail;
+    Logger.log("Searching for sheet: " + sheetName);
 
-    // Try to find existing sheet
     let spreadsheet = findSpreadsheetByName(sheetName);
 
-    // If not found, create new one
     if (!spreadsheet) {
-      Logger.log("Creating new sheet for user: " + userEmail);
+      Logger.log("Sheet not found by name, creating a new one...");
       spreadsheet = createNewSpreadsheet(sheetName);
     }
 
-    // Get or create the calculations tab
-    let sheet = spreadsheet.getSheetByName(CONFIG.SHEET_TAB_NAME);
+    if (!spreadsheet) {
+      Logger.log("CRITICAL: Failed to create or find spreadsheet");
+      return null;
+    }
 
+    let sheet = spreadsheet.getSheetByName(CONFIG.SHEET_TAB_NAME);
     if (!sheet) {
+      Logger.log("Calculations tab not found, inserting new one...");
       sheet = spreadsheet.insertSheet(CONFIG.SHEET_TAB_NAME);
       setupSheetHeaders(sheet);
       formatSheet(sheet);
     }
 
-    // Validate sheet structure
     validateSheetStructure(sheet);
-
     return sheet;
   } catch (error) {
-    Logger.log("getOrCreateUserSheet error: " + error.toString());
-    throw new Error("Failed to get or create user sheet: " + error.toString());
+    Logger.log("getOrCreateUserSheet ERROR: " + error.toString());
+    return null;
   }
 }
 
