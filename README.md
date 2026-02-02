@@ -1,17 +1,28 @@
-# Terzaghi Calculator v2.0
+# Terzaghi Calculator v2.1 (Beta)
+
+![Status](https://img.shields.io/badge/Status-Under%20Development-yellow)
 
 Kalkulator online untuk analisis daya dukung pondasi dangkal menggunakan metode Terzaghi, dengan fitur penyimpanan data ke Google Sheets.
+
+> **⚠️ STATUS PENGEMBANGAN:**
+> Aplikasi ini sedang dalam tahap pengembangan aktif (Beta).
+>
+> - **Login Google**: ✅ Berfungsi normal.
+> - **Perhitungan**: ✅ Akurat dan teruji.
+> - **Fitur Simpan**: ⚠️ Masih dalam perbaikan/penyempurnaan stabilitas.
 
 ![Calculator Preview](assets/screenshots/calculator-ui.png)
 
 ## ✨ Features
 
-### v2.0 (Current)
+### v2.1 (Current Dev)
 
 - ✅ **Perhitungan Daya Dukung Terzaghi** - Strip, Square, Circular foundations
 - ✅ **General & Local Shear Failure** - Dengan bearing capacity factors lengkap
 - ✅ **Pengaruh Muka Air Tanah** - Multiple groundwater scenarios
-- ✅ **Optional Save Feature** - Toggle on/off untuk privasi
+- ✅ **Google OAuth Login** - Aman dengan minimal permissions
+- ✅ **Auto Google Sheet Creation** - Setiap user punya sheet pribadi
+- ⚠️ **Save & History** - Sedang dioptimalkan stabilitasnya
 - ✅ **Google OAuth Login** - Aman dengan minimal permissions
 - ✅ **Auto Google Sheet Creation** - Setiap user punya sheet pribadi
 - ✅ **Calculation History** - View, load, dan manage perhitungan lama
