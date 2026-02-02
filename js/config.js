@@ -14,7 +14,7 @@
 const CONFIG = {
     // Backend Configuration
     // URL Backend Web App (Updated: 2026-02-02)
-    BACKEND_URL: 'https://script.google.com/macros/s/AKfycbx4Y-BqfAxPvdGY8kDDcNFwXozjQSCUTcVmtyA2X2LkubyLwCXRrUqXL_SVS4PUGGxM2w/exec',
+    BACKEND_URL: 'https://script.google.com/macros/s/AKfycbzR_pHYzADPBgR6pAEUzcReVqMTZUqnNYsYvoINPRZAjnQD-TlZOxXAG4ReXTubvt7FkA/exec',
     
     // Feature Flags
     SAVE_FEATURE_ENABLED_DEFAULT: false, // Default state untuk save toggle
