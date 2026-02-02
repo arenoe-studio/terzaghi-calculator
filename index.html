@@ -1,0 +1,321 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Daya Dukung Pondasi Dangkal (Terzaghi)</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+<!-- Save Feature Toggle - Fixed position top right -->
+<div class="save-toggle-container">
+    <span class="save-toggle-label">Aktifkan Penyimpanan</span>
+    <label class="toggle-switch">
+        <input type="checkbox" id="saveFeatureToggle" onchange="toggleSaveFeature()">
+        <span class="toggle-slider"></span>
+    </label>
+</div>
+
+<div class="header-container">
+    <div class="header-logos">
+        <img src="https://placehold.co/150x50/003366/FFFFFF?text=Logo+ITS&font=montserrat" alt="Logo ITS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/150x50/cccccc/000000?text=Logo+ITS+Error';">
+        <img src="https://placehold.co/60x60/FFFFFF/0052CC?text=HMDS&font=montserrat" alt="Logo HMDS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/cccccc/000000?text=Logo+HMDS+Error';">
+    </div>
+    <div class="header-title">Rekayasa Pondasi</div>
+</div>
+
+<div class="calculator-container">
+    <h2 class="main-title">Analisis Daya Dukung Pondasi Dangkal<br>(Terzaghi)</h2>
+    <div id="messageArea" class="mb-6"></div>
+    
+    <!-- Login Section - Shows when save toggle is ON -->
+    <div id="loginSection" class="login-section">
+        <div class="login-content">
+            <!-- Not logged in state -->
+            <div id="loginPrompt" class="login-info">
+                <h4>ðŸ’¾ Simpan Riwayat Perhitungan</h4>
+                <p style="margin: 0; font-size: 0.9rem; color: #566573;">
+                    Login dengan Google untuk menyimpan perhitungan Anda ke Google Sheets pribadi.
+                </p>
+            </div>
+            
+            <!-- Logged in state (hidden by default) -->
+            <div id="userInfo" class="login-info" style="display: none;">
+                <h4>Selamat datang!</h4>
+                <p class="user-email" id="userEmail">-</p>
+                <span class="privacy-badge">
+                    <span>ðŸ”’</span> Data tersimpan di Drive Anda
+                </span>
+            </div>
+            
+            <!-- Login/Logout button -->
+            <div>
+                <button id="loginButton" class="login-button" onclick="loginWithGoogle()">
+                    Login dengan Google
+                </button>
+                <button id="logoutButton" class="logout-button" onclick="handleLogout()" style="display: none;">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Input Fields (tidak berubah, sama seperti sebelumnya) -->
+    <div class="section-title">Parameter Dasar Pondasi & Tanah</div>
+    <div class="input-grid mb-6">
+        <div class="input-group">
+            <label for="tipePondasi">Tipe Pondasi:</label>
+            <select id="tipePondasi" class="select-field">
+                <option value="lajur">Lajur (Strip)</option>
+                <option value="bujursangkar">Bujursangkar (Square)</option>
+                <option value="lingkaran">Lingkaran (Circular)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="tipeKeruntuhan">Tipe Keruntuhan Geser:</label>
+            <select id="tipeKeruntuhan" class="select-field">
+                <option value="umum">Umum (General Shear)</option>
+                <option value="lokal">Lokal (Local Shear)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="kohesi">Kohesi Tanah (c):</label>
+            <div class="flex items-center">
+                <input type="number" id="kohesi" step="any" class="input-field" placeholder="e.g., 0.1">
+                <span class="unit-text">kg/cmÂ²</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="sudutGeser">Sudut Geser Dalam (Ï†):</label>
+             <div class="flex items-center">
+                <input type="number" id="sudutGeser" step="any" class="input-field" placeholder="e.g., 25">
+                <span class="unit-text">derajat</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="gammaTanah">Berat Vol. Tanah (Î³) (di atas MAT/lembab):</label>
+            <div class="flex items-center">
+                <input type="number" id="gammaTanah" step="any" class="input-field" placeholder="e.g., 0.0018">
+                <span class="unit-text">kg/cmÂ³</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="lebarPondasi">Lebar/Diameter Pondasi (B):</label>
+            <div class="flex items-center">
+                <input type="number" id="lebarPondasi" step="any" class="input-field" placeholder="e.g., 1.5">
+                <span class="unit-text">meter</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="kedalamanPondasi">Kedalaman Dasar Pondasi (Df):</label>
+            <div class="flex items-center">
+                <input type="number" id="kedalamanPondasi" step="any" class="input-field" placeholder="e.g., 1.0">
+                <span class="unit-text">meter</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="faktorKeamanan">Faktor Keamanan (SF):</label>
+            <div class="flex items-center">
+                <input type="number" id="faktorKeamanan" step="any" class="input-field" value="3">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Parameter Muka Air Tanah (MAT)</div>
+    <div class="input-grid">
+         <div class="input-group">
+            <label for="kedalamanMAT">Kedalaman MAT dari Permukaan (Dw):</label>
+            <div class="flex items-center">
+                <input type="number" id="kedalamanMAT" step="any" class="input-field" placeholder="e.g., 2.0 atau kosong jika tidak ada pengaruh MAT">
+                <span class="unit-text">meter</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="gammaSat">Berat Volume Jenuh Tanah (Î³<sub>sat</sub>):</label>
+            <div class="flex items-center">
+                <input type="number" id="gammaSat" step="any" class="input-field" placeholder="e.g., 0.0020">
+                <span class="unit-text">kg/cmÂ³</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="gammaAir">Berat Volume Air (Î³<sub>w</sub>):</label>
+            <div class="flex items-center">
+                <input type="number" id="gammaAir" step="any" class="input-field" value="0.001">
+                <span class="unit-text">kg/cmÂ³</span>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" onclick="hitungDayaDukung()" class="calculate-button">Hitung Daya Dukung</button>
+
+    <div class="results-container">
+        <h3>Hasil Perhitungan:</h3>
+        <div class="result-entry">
+            <div class="result-item"><strong>Faktor Daya Dukung (Nc / N'c):</strong> <span id="hasilNc" class="value">-</span></div>
+            <span class="result-unit-text"></span> 
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Faktor Daya Dukung (Nq / N'q):</strong> <span id="hasilNq" class="value">-</span></div>
+            <span class="result-unit-text"></span> 
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Faktor Daya Dukung (NÎ³ / N'Î³):</strong> <span id="hasilNgamma" class="value">-</span></div>
+            <span class="result-unit-text"></span> 
+        </div>
+        <div class="result-entry" id="cPrimaRow" style="display:none;">
+            <div class="result-item"><strong>Kohesi Modifikasi (c'):</strong> <span id="hasilCprime" class="value">-</span></div>
+            <span class="result-unit-text">kg/cmÂ²</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Berat Vol. Efektif (Î³') (Apung):</strong> <span id="hasilGammaPrima" class="value">-</span></div>
+            <span class="result-unit-text">kg/cmÂ³</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Tekanan Overburden Efektif (q<sub>adj</sub>):</strong> <span id="hasilQadj" class="value">-</span></div>
+            <span class="result-unit-text">kg/cmÂ²</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Berat Vol. Efektif untuk Suku ke-3 (Î³<sub>eff</sub>):</strong> <span id="hasilGammaEff" class="value">-</span></div>
+            <span class="result-unit-text">kg/cmÂ³</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Daya Dukung Ultimit (q<sub>ult</sub>):</strong> <span id="hasilQult" class="value">-</span></div>
+            <span class="result-unit-text">kg/cmÂ²</span>
+        </div>
+        <div id="formulaDisplayContainer" class="formula-display" style="display:none; grid-column: 1 / -1;">
+             <strong>Rumus q<sub>ult</sub> yang digunakan:</strong><br>
+             <span id="formulaText"></span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Daya Dukung Aman (q<sub>all</sub>):</strong> <span id="hasilQall" class="value">-</span></div>
+            <span class="result-unit-text">kg/cmÂ²</span>
+        </div>
+    </div>
+
+    <!-- Save Calculation Section - Shows when logged in and results calculated -->
+    <div id="saveSection" class="save-section">
+        <h4>ðŸ’¾ Simpan Perhitungan Ini</h4>
+        
+        <div class="save-input-group">
+            <label for="calculationDescription">Nama/Deskripsi (Opsional):</label>
+            <input 
+                type="text" 
+                id="calculationDescription" 
+                placeholder="Contoh: Fondasi Gedung A - Zona 1"
+                maxlength="200"
+            >
+        </div>
+        
+        <button class="save-button" onclick="saveCalculationToSheet()">
+            <span>ðŸ’¾</span>
+            <span id="saveButtonText">Simpan ke Google Sheet</span>
+        </button>
+        
+        <button class="history-button" onclick="showHistoryModal()">
+            <span>ðŸ“‹</span> Lihat Riwayat Perhitungan
+        </button>
+    </div>
+
+    <div class="watermark">
+        D4 Teknologi Rekayasa Konstruksi Bangunan Air<br>
+        Institut Teknologi Sepuluh Nopember<br>
+        Kelas C - TRKBA 2023
+    </div>
+</div>
+
+<!-- Tombol Bantuan (?) -->
+<div id="helpButton" class="help-button" onclick="toggleHelpModal()">?</div>
+
+<!-- Modal untuk Teori -->
+<div id="helpModal" class="modal-overlay" onclick="closeHelpModalOutside(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close-button" onclick="toggleHelpModal()">&times;</button>
+        <h3 style="font-size: 1.5rem; color: #0052cc; margin-top:0;">Dasar Teori Perhitungan</h3>
+        
+        <div class="modal-section">
+            <h4>Keruntuhan Geser Umum (General Shear Failure)</h4>
+            <p>Terjadi pada tanah padat atau kaku. Formula daya dukung ultimit (q<sub>ult</sub>) Terzaghi:</p>
+            <ul>
+                <li><strong>Pondasi Lajur (Strip):</strong> 
+                    <div class="formula">q<sub>ult</sub> = cÂ·N<sub>c</sub> + qÂ·N<sub>q</sub> + 0.5Â·Î³<sub>eff</sub>Â·BÂ·N<sub>Î³</sub></div></li>
+                <li><strong>Pondasi Bujursangkar (Square):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 1.3Â·cÂ·N<sub>c</sub> + qÂ·N<sub>q</sub> + 0.4Â·Î³<sub>eff</sub>Â·BÂ·N<sub>Î³</sub></div></li>
+                <li><strong>Pondasi Lingkaran (Circular):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 1.3Â·cÂ·N<sub>c</sub> + qÂ·N<sub>q</sub> + 0.3Â·Î³<sub>eff</sub>Â·BÂ·N<sub>Î³</sub></div></li>
+            </ul>
+            <p>Dimana: c = kohesi tanah, q = tekanan overburden efektif di dasar pondasi, Î³<sub>eff</sub> = berat volume efektif tanah di bawah dasar pondasi, B = lebar/diameter pondasi, N<sub>c</sub>, N<sub>q</sub>, N<sub>Î³</sub> = faktor daya dukung Terzaghi (fungsi dari Ï†).</p>
+        </div>
+
+        <div class="modal-section">
+            <h4>Keruntuhan Geser Lokal (Local Shear Failure)</h4>
+            <p>Terjadi pada tanah lepas atau lunak. Parameter tanah yang dimodifikasi digunakan:</p>
+            <ul>
+                <li>Kohesi modifikasi: <div class="formula">c' = (2/3)Â·c</div></li>
+                <li>Faktor daya dukung yang digunakan adalah N'<sub>c</sub>, N'<sub>q</sub>, N'<sub>Î³</sub> (dari tabel Terzaghi untuk local shear, berdasarkan Ï† asli).</li>
+            </ul>
+            <p>Formula daya dukung ultimit (q<sub>ult</sub>) Terzaghi untuk Local Shear:</p>
+             <ul>
+                <li><strong>Pondasi Lajur (Strip):</strong> 
+                    <div class="formula">q<sub>ult</sub> = c'Â·N'<sub>c</sub> + qÂ·N'<sub>q</sub> + 0.5Â·Î³<sub>eff</sub>Â·BÂ·N'<sub>Î³</sub></div></li>
+                <li><strong>Pondasi Bujursangkar (Square):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 0.867Â·c'Â·N'<sub>c</sub> + qÂ·N'<sub>q</sub> + 0.4Â·Î³<sub>eff</sub>Â·BÂ·N'<sub>Î³</sub></div></li>
+                <li><strong>Pondasi Lingkaran (Circular):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 0.867Â·c'Â·N'<sub>c</sub> + qÂ·N'<sub>q</sub> + 0.3Â·Î³<sub>eff</sub>Â·BÂ·N'<sub>Î³</sub></div></li>
+            </ul>
+        </div>
+
+        <div class="modal-section">
+            <h4>Pengaruh Muka Air Tanah (MAT)</h4>
+            <p>MAT mempengaruhi tekanan overburden (q) dan berat volume tanah (Î³<sub>eff</sub>) dalam suku ketiga persamaan.</p>
+            <p>Diketahui: D<sub>f</sub> = kedalaman pondasi, D<sub>w</sub> = kedalaman MAT dari permukaan, Î³ = berat volume tanah lembab/di atas MAT, Î³<sub>sat</sub> = berat volume jenuh, Î³<sub>w</sub> = berat volume air.</p>
+            <p>Berat volume apung/efektif tanah: <div class="formula">Î³' = Î³<sub>sat</sub> - Î³<sub>w</sub></div></p>
+            
+            <h5>Kondisi 1: MAT di atas dasar pondasi (D<sub>w</sub> &lt; D<sub>f</sub>)</h5>
+            <ul>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = (Î³ Â· D<sub>w</sub>) + (Î³' Â· (D<sub>f</sub> - D<sub>w</sub>))</div></li>
+                <li>Berat volume untuk suku ke-3: <div class="formula">Î³<sub>eff</sub> = Î³'</div></li>
+            </ul>
+
+            <h5>Kondisi 2: MAT tepat di dasar pondasi (D<sub>w</sub> = D<sub>f</sub>)</h5>
+            <ul>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = Î³ Â· D<sub>f</sub></div></li>
+                <li>Berat volume untuk suku ke-3: <div class="formula">Î³<sub>eff</sub> = Î³'</div></li>
+            </ul>
+
+            <h5>Kondisi 3: MAT di bawah dasar pondasi (D<sub>w</sub> &gt; D<sub>f</sub>)</h5>
+            <p>Jarak MAT dari dasar pondasi: d = D<sub>w</sub> - D<sub>f</sub></p>
+            <ul>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = Î³ Â· D<sub>f</sub></div></li>
+                <li>Berat volume untuk suku ke-3 (Î³<sub>eff</sub>):
+                    <ul>
+                        <li>Jika d â‰¥ B: <div class="formula">Î³<sub>eff</sub> = Î³</div></li>
+                        <li>Jika d &lt; B: <div class="formula">Î³<sub>eff</sub> = Î³' + (d/B) Â· (Î³ - Î³')</div> (interpolasi linier)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+         <button type="button" onclick="toggleHelpModal()" class="calculate-button" style="width: auto; padding: 0.6rem 1.2rem; margin-top: 1.5rem; float: right;">Tutup</button>
+    </div>
+</div>
+
+
+
+
+<!-- External JavaScript -->
+<script src="js/config.js"></script>
+<script src="js/calculator.js"></script>
+<script src="js/save-features.js"></script>
+
+</body>
+</html>

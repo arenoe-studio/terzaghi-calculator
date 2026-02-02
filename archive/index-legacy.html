@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Daya Dukung Pondasi Dangkal (Terzaghi)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #eef2f9;
+            margin: 0; /* Menghilangkan margin default body */
+            padding-bottom: 80px; /* Memberi ruang untuk tombol bantuan fixed */
+        }
+        .header-container {
+            background-color: #ffffff;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .header-logos {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .logo {
+            max-height: 50px;
+            width: auto;
+        }
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0052cc;
+        }
+        .calculator-container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 70, 170, 0.1);
+            max-width: 700px;
+            margin: 0 auto 2.5rem auto;
+            position: relative;
+        }
+        .main-title {
+            font-size: 1.75rem;
+            line-height: 1.3;
+            text-align: center;
+            color: #0052cc;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .input-field, .select-field {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #b0c4de;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            font-size: 0.95rem;
+            background-color: #fdfdff;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .input-field:focus, .select-field:focus {
+            border-color: #0052cc;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(0, 82, 204, 0.2);
+        }
+        .unit-text {
+            font-size: 0.8rem;
+            color: #566573;
+            margin-left: 0.5rem;
+            white-space: nowrap;
+        }
+        .calculate-button {
+            width: 100%;
+            background-color: #0062e6;
+            color: white;
+            padding: 0.9rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+            margin-top: 2rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .calculate-button:hover {
+            background-color: #004cb3;
+        }
+        .calculate-button:active {
+            transform: translateY(1px);
+        }
+        .results-container h3 {
+            margin-top: 2.5rem;
+            margin-bottom: 1.2rem;
+            color: #0052cc;
+            font-weight: 600;
+            font-size: 1.25rem;
+            border-bottom: 2px solid #d6e4f0;
+            padding-bottom: 0.6rem;
+        }
+        .result-entry {
+            display: grid;
+            grid-template-columns: 1fr auto; 
+            gap: 0.75rem; 
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        .result-item { 
+            background-color: #f4f8ff;
+            padding: 0.85rem 1rem;
+            border: 1px solid #d6e4f0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            font-size: 0.95rem;
+            flex-grow: 1; 
+        }
+        .result-item strong { 
+            color: #2c3e50;
+            flex-shrink: 0; 
+            margin-right: 1rem;
+        }
+        .result-item span.value { 
+            color: #004cb3;
+            font-weight: 600;
+            text-align: right; 
+            flex-grow: 1; 
+        }
+        .result-unit-text { 
+            font-size: 0.85rem;
+            color: #566573;
+            white-space: nowrap;
+            min-width: 50px; 
+            text-align: left;
+        }
+        .formula-display {
+            background-color: #e9f2ff;
+            padding: 1rem;
+            border: 1px solid #c3dafa;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        .formula-display strong {
+            color: #0052cc;
+        }
+        .error-message {
+            color: #c0392b;
+            background-color: #fdecea;
+            border: 1px solid #f5b7b1;
+            padding: 0.85rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .success-message {
+            color: #27ae60;
+            background-color: #d5f4e6;
+            border: 1px solid #7dcea0;
+            padding: 0.85rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .warning-message {
+            color: #d68910;
+            background-color: #fcf3cf;
+            border: 1px solid #f9e79f;
+            padding: 0.85rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .info-message {
+            color: #2980b9;
+            background-color: #d6eaf8;
+            border: 1px solid #85c1e9;
+            padding: 0.85rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #0052cc;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #d6e4f0;
+        }
+        .watermark {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #d6e4f0;
+            font-size: 0.75rem;
+            color: #778da9;
+            line-height: 1.4;
+        }
+
+        /* --- CSS untuk Tombol Bantuan dan Modal --- */
+        .help-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #0062e6;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem; /* Ukuran tanda tanya */
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 70, 170, 0.3);
+            z-index: 1000; /* Pastikan di atas elemen lain */
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .help-button:hover {
+            background-color: #004cb3;
+            transform: scale(1.1);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Latar belakang semi-transparan */
+            display: none; /* Sembunyikan secara default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1050; /* Di atas tombol bantuan */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.5);
+            width: 100%;
+            max-width: 800px; /* Lebar maksimal modal */
+            max-height: 85vh; /* Tinggi maksimal modal, sisakan ruang atas bawah */
+            overflow-y: auto; /* Scroll jika konten panjang */
+            position: relative;
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .modal-close-button:hover {
+            color: #555;
+        }
+        .modal-section h4 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #0052cc;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid #d6e4f0;
+        }
+        .modal-section p, .modal-section li {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+        .modal-section ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .modal-section .formula {
+            background-color: #f4f8ff;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #d6e4f0;
+            margin: 0.5rem 0 1rem 0;
+            font-family: 'Courier New', Courier, monospace; /* Font monospace untuk formula */
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+        /* --- AKHIR CSS Modal --- */
+        
+        /* ============================================================================ */
+        /* CSS UNTUK SAVE FEATURE - FASE 4 */
+        /* ============================================================================ */
+        
+        /* Save Toggle Switch */
+        .save-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 70, 170, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+        
+        .save-toggle-container:hover {
+            box-shadow: 0 6px 16px rgba(0, 70, 170, 0.25);
+        }
+        
+        .save-toggle-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+        
+        /* Custom Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #0062e6;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* Login Section */
+        .login-section {
+            background-color: #e9f2ff;
+            border: 1px solid #c3dafa;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+        
+        .login-section.active {
+            display: block;
+        }
+        
+        .login-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .login-info {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .login-info h4 {
+            margin: 0 0 0.5rem 0;
+            color: #0052cc;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .user-email {
+            color: #2c3e50;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            background-color: #d5f4e6;
+            color: #27ae60;
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .login-button, .logout-button {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .login-button {
+            background-color: #0062e6;
+            color: white;
+        }
+        
+        .login-button:hover {
+            background-color: #004cb3;
+            transform: translateY(-1px);
+        }
+        
+        .logout-button {
+            background-color: #e0e0e0;
+            color: #2c3e50;
+        }
+        
+        .logout-button:hover {
+            background-color: #c0c0c0;
+        }
+        
+        /* Save Calculation Section */
+        .save-section {
+            background-color: #f4f8ff;
+            border: 1px solid #d6e4f0;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 2rem;
+            display: none; /* Hidden until logged in */
+        }
+        
+        .save-section.active {
+            display: block;
+        }
+        
+        .save-section h4 {
+            margin: 0 0 1rem 0;
+            color: #0052cc;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .save-input-group {
+            margin-bottom: 1rem;
+        }
+        
+        .save-input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .save-input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d6e4f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .save-button {
+            width: 100%;
+            background-color: #27ae60;
+            color: white;
+            padding: 0.85rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .save-button:hover {
+            background-color: #229954;
+            transform: translateY(-1px);
+        }
+        
+        .save-button:active {
+            transform: translateY(0);
+        }
+        
+        .save-button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .history-button {
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 0.75rem;
+        }
+        
+        .history-button:hover {
+            background-color: #2980b9;
+        }
+        
+        /* History Modal */
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .history-modal.active {
+            display: flex;
+        }
+        
+        .history-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .history-header {
+            position: sticky;
+            top: 0;
+            background-color: #0062e6;
+            color: white;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .history-header h3 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 600;
+        }
+        
+        .history-close-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .history-close-button:hover {
+            transform: scale(1.2);
+        }
+        
+        .history-body {
+            padding: 1.5rem;
+        }
+        
+        .history-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .history-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .history-item:hover {
+            border-color: #0062e6;
+            box-shadow: 0 4px 12px rgba(0, 98, 230, 0.15);
+        }
+        
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+        
+        .history-item-title {
+            flex: 1;
+        }
+        
+        .history-item-title h5 {
+            margin: 0 0 0.25rem 0;
+            color: #0052cc;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .history-item-date {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+        
+        .history-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .history-action-button {
+            padding: 0.375rem 0.75rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .history-load-button {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .history-load-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .history-delete-button {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .history-delete-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .history-item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .history-detail {
+            color: #2c3e50;
+        }
+        
+        .history-detail strong {
+            color: #0052cc;
+        }
+        
+        /* Loading Spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0062e6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .save-toggle-container {
+                top: 10px;
+                right: 10px;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .login-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .history-item-details {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+
+<!-- Save Feature Toggle - Fixed position top right -->
+<div class="save-toggle-container">
+    <span class="save-toggle-label">Aktifkan Penyimpanan</span>
+    <label class="toggle-switch">
+        <input type="checkbox" id="saveFeatureToggle" onchange="toggleSaveFeature()">
+        <span class="toggle-slider"></span>
+    </label>
+</div>
+
+<div class="header-container">
+    <div class="header-logos">
+        <img src="https://placehold.co/150x50/003366/FFFFFF?text=Logo+ITS&font=montserrat" alt="Logo ITS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/150x50/cccccc/000000?text=Logo+ITS+Error';">
+        <img src="https://placehold.co/60x60/FFFFFF/0052CC?text=HMDS&font=montserrat" alt="Logo HMDS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/cccccc/000000?text=Logo+HMDS+Error';">
+    </div>
+    <div class="header-title">Rekayasa Pondasi</div>
+</div>
+
+<div class="calculator-container">
+    <h2 class="main-title">Analisis Daya Dukung Pondasi Dangkal<br>(Terzaghi)</h2>
+    <div id="messageArea" class="mb-6"></div>
+    
+    <!-- Login Section - Shows when save toggle is ON -->
+    <div id="loginSection" class="login-section">
+        <div class="login-content">
+            <!-- Not logged in state -->
+            <div id="loginPrompt" class="login-info">
+                <h4>💾 Simpan Riwayat Perhitungan</h4>
+                <p style="margin: 0; font-size: 0.9rem; color: #566573;">
+                    Login dengan Google untuk menyimpan perhitungan Anda ke Google Sheets pribadi.
+                </p>
+            </div>
+            
+            <!-- Logged in state (hidden by default) -->
+            <div id="userInfo" class="login-info" style="display: none;">
+                <h4>Selamat datang!</h4>
+                <p class="user-email" id="userEmail">-</p>
+                <span class="privacy-badge">
+                    <span>🔒</span> Data tersimpan di Drive Anda
+                </span>
+            </div>
+            
+            <!-- Login/Logout button -->
+            <div>
+                <button id="loginButton" class="login-button" onclick="loginWithGoogle()">
+                    Login dengan Google
+                </button>
+                <button id="logoutButton" class="logout-button" onclick="handleLogout()" style="display: none;">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Input Fields (tidak berubah, sama seperti sebelumnya) -->
+    <div class="section-title">Parameter Dasar Pondasi & Tanah</div>
+    <div class="input-grid mb-6">
+        <div class="input-group">
+            <label for="tipePondasi">Tipe Pondasi:</label>
+            <select id="tipePondasi" class="select-field">
+                <option value="lajur">Lajur (Strip)</option>
+                <option value="bujursangkar">Bujursangkar (Square)</option>
+                <option value="lingkaran">Lingkaran (Circular)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="tipeKeruntuhan">Tipe Keruntuhan Geser:</label>
+            <select id="tipeKeruntuhan" class="select-field">
+                <option value="umum">Umum (General Shear)</option>
+                <option value="lokal">Lokal (Local Shear)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="kohesi">Kohesi Tanah (c):</label>
+            <div class="flex items-center">
+                <input type="number" id="kohesi" step="any" class="input-field" placeholder="e.g., 0.1">
+                <span class="unit-text">kg/cm²</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="sudutGeser">Sudut Geser Dalam (φ):</label>
+             <div class="flex items-center">
+                <input type="number" id="sudutGeser" step="any" class="input-field" placeholder="e.g., 25">
+                <span class="unit-text">derajat</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="gammaTanah">Berat Vol. Tanah (γ) (di atas MAT/lembab):</label>
+            <div class="flex items-center">
+                <input type="number" id="gammaTanah" step="any" class="input-field" placeholder="e.g., 0.0018">
+                <span class="unit-text">kg/cm³</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="lebarPondasi">Lebar/Diameter Pondasi (B):</label>
+            <div class="flex items-center">
+                <input type="number" id="lebarPondasi" step="any" class="input-field" placeholder="e.g., 1.5">
+                <span class="unit-text">meter</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="kedalamanPondasi">Kedalaman Dasar Pondasi (Df):</label>
+            <div class="flex items-center">
+                <input type="number" id="kedalamanPondasi" step="any" class="input-field" placeholder="e.g., 1.0">
+                <span class="unit-text">meter</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="faktorKeamanan">Faktor Keamanan (SF):</label>
+            <div class="flex items-center">
+                <input type="number" id="faktorKeamanan" step="any" class="input-field" value="3">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Parameter Muka Air Tanah (MAT)</div>
+    <div class="input-grid">
+         <div class="input-group">
+            <label for="kedalamanMAT">Kedalaman MAT dari Permukaan (Dw):</label>
+            <div class="flex items-center">
+                <input type="number" id="kedalamanMAT" step="any" class="input-field" placeholder="e.g., 2.0 atau kosong jika tidak ada pengaruh MAT">
+                <span class="unit-text">meter</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="gammaSat">Berat Volume Jenuh Tanah (γ<sub>sat</sub>):</label>
+            <div class="flex items-center">
+                <input type="number" id="gammaSat" step="any" class="input-field" placeholder="e.g., 0.0020">
+                <span class="unit-text">kg/cm³</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label for="gammaAir">Berat Volume Air (γ<sub>w</sub>):</label>
+            <div class="flex items-center">
+                <input type="number" id="gammaAir" step="any" class="input-field" value="0.001">
+                <span class="unit-text">kg/cm³</span>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" onclick="hitungDayaDukung()" class="calculate-button">Hitung Daya Dukung</button>
+
+    <div class="results-container">
+        <h3>Hasil Perhitungan:</h3>
+        <div class="result-entry">
+            <div class="result-item"><strong>Faktor Daya Dukung (Nc / N'c):</strong> <span id="hasilNc" class="value">-</span></div>
+            <span class="result-unit-text"></span> 
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Faktor Daya Dukung (Nq / N'q):</strong> <span id="hasilNq" class="value">-</span></div>
+            <span class="result-unit-text"></span> 
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Faktor Daya Dukung (Nγ / N'γ):</strong> <span id="hasilNgamma" class="value">-</span></div>
+            <span class="result-unit-text"></span> 
+        </div>
+        <div class="result-entry" id="cPrimaRow" style="display:none;">
+            <div class="result-item"><strong>Kohesi Modifikasi (c'):</strong> <span id="hasilCprime" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm²</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Berat Vol. Efektif (γ') (Apung):</strong> <span id="hasilGammaPrima" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm³</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Tekanan Overburden Efektif (q<sub>adj</sub>):</strong> <span id="hasilQadj" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm²</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Berat Vol. Efektif untuk Suku ke-3 (γ<sub>eff</sub>):</strong> <span id="hasilGammaEff" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm³</span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Daya Dukung Ultimit (q<sub>ult</sub>):</strong> <span id="hasilQult" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm²</span>
+        </div>
+        <div id="formulaDisplayContainer" class="formula-display" style="display:none; grid-column: 1 / -1;">
+             <strong>Rumus q<sub>ult</sub> yang digunakan:</strong><br>
+             <span id="formulaText"></span>
+        </div>
+        <div class="result-entry">
+            <div class="result-item"><strong>Daya Dukung Aman (q<sub>all</sub>):</strong> <span id="hasilQall" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm²</span>
+        </div>
+    </div>
+
+    <!-- Save Calculation Section - Shows when logged in and results calculated -->
+    <div id="saveSection" class="save-section">
+        <h4>💾 Simpan Perhitungan Ini</h4>
+        
+        <div class="save-input-group">
+            <label for="calculationDescription">Nama/Deskripsi (Opsional):</label>
+            <input 
+                type="text" 
+                id="calculationDescription" 
+                placeholder="Contoh: Fondasi Gedung A - Zona 1"
+                maxlength="200"
+            >
+        </div>
+        
+        <button class="save-button" onclick="saveCalculationToSheet()">
+            <span>💾</span>
+            <span id="saveButtonText">Simpan ke Google Sheet</span>
+        </button>
+        
+        <button class="history-button" onclick="showHistoryModal()">
+            <span>📋</span> Lihat Riwayat Perhitungan
+        </button>
+    </div>
+
+    <div class="watermark">
+        D4 Teknologi Rekayasa Konstruksi Bangunan Air<br>
+        Institut Teknologi Sepuluh Nopember<br>
+        Kelas C - TRKBA 2023
+    </div>
+</div>
+
+<!-- Tombol Bantuan (?) -->
+<div id="helpButton" class="help-button" onclick="toggleHelpModal()">?</div>
+
+<!-- Modal untuk Teori -->
+<div id="helpModal" class="modal-overlay" onclick="closeHelpModalOutside(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close-button" onclick="toggleHelpModal()">&times;</button>
+        <h3 style="font-size: 1.5rem; color: #0052cc; margin-top:0;">Dasar Teori Perhitungan</h3>
+        
+        <div class="modal-section">
+            <h4>Keruntuhan Geser Umum (General Shear Failure)</h4>
+            <p>Terjadi pada tanah padat atau kaku. Formula daya dukung ultimit (q<sub>ult</sub>) Terzaghi:</p>
+            <ul>
+                <li><strong>Pondasi Lajur (Strip):</strong> 
+                    <div class="formula">q<sub>ult</sub> = c·N<sub>c</sub> + q·N<sub>q</sub> + 0.5·γ<sub>eff</sub>·B·N<sub>γ</sub></div></li>
+                <li><strong>Pondasi Bujursangkar (Square):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 1.3·c·N<sub>c</sub> + q·N<sub>q</sub> + 0.4·γ<sub>eff</sub>·B·N<sub>γ</sub></div></li>
+                <li><strong>Pondasi Lingkaran (Circular):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 1.3·c·N<sub>c</sub> + q·N<sub>q</sub> + 0.3·γ<sub>eff</sub>·B·N<sub>γ</sub></div></li>
+            </ul>
+            <p>Dimana: c = kohesi tanah, q = tekanan overburden efektif di dasar pondasi, γ<sub>eff</sub> = berat volume efektif tanah di bawah dasar pondasi, B = lebar/diameter pondasi, N<sub>c</sub>, N<sub>q</sub>, N<sub>γ</sub> = faktor daya dukung Terzaghi (fungsi dari φ).</p>
+        </div>
+
+        <div class="modal-section">
+            <h4>Keruntuhan Geser Lokal (Local Shear Failure)</h4>
+            <p>Terjadi pada tanah lepas atau lunak. Parameter tanah yang dimodifikasi digunakan:</p>
+            <ul>
+                <li>Kohesi modifikasi: <div class="formula">c' = (2/3)·c</div></li>
+                <li>Faktor daya dukung yang digunakan adalah N'<sub>c</sub>, N'<sub>q</sub>, N'<sub>γ</sub> (dari tabel Terzaghi untuk local shear, berdasarkan φ asli).</li>
+            </ul>
+            <p>Formula daya dukung ultimit (q<sub>ult</sub>) Terzaghi untuk Local Shear:</p>
+             <ul>
+                <li><strong>Pondasi Lajur (Strip):</strong> 
+                    <div class="formula">q<sub>ult</sub> = c'·N'<sub>c</sub> + q·N'<sub>q</sub> + 0.5·γ<sub>eff</sub>·B·N'<sub>γ</sub></div></li>
+                <li><strong>Pondasi Bujursangkar (Square):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 0.867·c'·N'<sub>c</sub> + q·N'<sub>q</sub> + 0.4·γ<sub>eff</sub>·B·N'<sub>γ</sub></div></li>
+                <li><strong>Pondasi Lingkaran (Circular):</strong> 
+                    <div class="formula">q<sub>ult</sub> = 0.867·c'·N'<sub>c</sub> + q·N'<sub>q</sub> + 0.3·γ<sub>eff</sub>·B·N'<sub>γ</sub></div></li>
+            </ul>
+        </div>
+
+        <div class="modal-section">
+            <h4>Pengaruh Muka Air Tanah (MAT)</h4>
+            <p>MAT mempengaruhi tekanan overburden (q) dan berat volume tanah (γ<sub>eff</sub>) dalam suku ketiga persamaan.</p>
+            <p>Diketahui: D<sub>f</sub> = kedalaman pondasi, D<sub>w</sub> = kedalaman MAT dari permukaan, γ = berat volume tanah lembab/di atas MAT, γ<sub>sat</sub> = berat volume jenuh, γ<sub>w</sub> = berat volume air.</p>
+            <p>Berat volume apung/efektif tanah: <div class="formula">γ' = γ<sub>sat</sub> - γ<sub>w</sub></div></p>
+            
+            <h5>Kondisi 1: MAT di atas dasar pondasi (D<sub>w</sub> &lt; D<sub>f</sub>)</h5>
+            <ul>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = (γ · D<sub>w</sub>) + (γ' · (D<sub>f</sub> - D<sub>w</sub>))</div></li>
+                <li>Berat volume untuk suku ke-3: <div class="formula">γ<sub>eff</sub> = γ'</div></li>
+            </ul>
+
+            <h5>Kondisi 2: MAT tepat di dasar pondasi (D<sub>w</sub> = D<sub>f</sub>)</h5>
+            <ul>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = γ · D<sub>f</sub></div></li>
+                <li>Berat volume untuk suku ke-3: <div class="formula">γ<sub>eff</sub> = γ'</div></li>
+            </ul>
+
+            <h5>Kondisi 3: MAT di bawah dasar pondasi (D<sub>w</sub> &gt; D<sub>f</sub>)</h5>
+            <p>Jarak MAT dari dasar pondasi: d = D<sub>w</sub> - D<sub>f</sub></p>
+            <ul>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = γ · D<sub>f</sub></div></li>
+                <li>Berat volume untuk suku ke-3 (γ<sub>eff</sub>):
+                    <ul>
+                        <li>Jika d ≥ B: <div class="formula">γ<sub>eff</sub> = γ</div></li>
+                        <li>Jika d &lt; B: <div class="formula">γ<sub>eff</sub> = γ' + (d/B) · (γ - γ')</div> (interpolasi linier)</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+         <button type="button" onclick="toggleHelpModal()" class="calculate-button" style="width: auto; padding: 0.6rem 1.2rem; margin-top: 1.5rem; float: right;">Tutup</button>
+    </div>
+</div>
+
+
+<script>
+    // ============================================================================
+    // CONFIGURATION & CONSTANTS
+    // ============================================================================
+    
+    /**
+     * Global configuration object untuk frontend
+     * Centralized config untuk easy maintenance dan deployment
+     * 
+     * IMPORTANT: Update BACKEND_URL setelah deploy Apps Script!
+     */
+    const CONFIG = {
+        // Backend Configuration
+        BACKEND_URL: 'YOUR_APPS_SCRIPT_URL_HERE', // TODO: Replace after deploying Apps Script
+        
+        // Feature Flags
+        SAVE_FEATURE_ENABLED_DEFAULT: false, // Default state untuk save toggle
+        ENABLE_HISTORY_FEATURE: true,
+        ENABLE_DELETE_FEATURE: true,
+        
+        // UI Configuration
+        MAX_HISTORY_DISPLAY: 50,
+        NOTIFICATION_DURATION: 5000, // milliseconds
+        LOADING_TIMEOUT: 10000, // max wait for backend response
+        
+        // LocalStorage Keys
+        STORAGE_KEY_SAVE_ENABLED: 'terzaghi_save_enabled',
+        STORAGE_KEY_USER_EMAIL: 'terzaghi_user_email',
+        STORAGE_KEY_USER_NAME: 'terzaghi_user_name',
+        
+        // Messages
+        MSG: {
+            LOGIN_SUCCESS: 'Login berhasil! Sekarang Anda bisa menyimpan perhitungan.',
+            LOGOUT_SUCCESS: 'Logout berhasil.',
+            SAVE_SUCCESS: 'Perhitungan berhasil disimpan ke Google Sheet!',
+            SAVE_ERROR: 'Gagal menyimpan perhitungan. Silakan coba lagi.',
+            LOAD_ERROR: 'Gagal memuat riwayat perhitungan.',
+            DELETE_SUCCESS: 'Perhitungan berhasil dihapus.',
+            DELETE_ERROR: 'Gagal menghapus perhitungan.',
+            LOGIN_REQUIRED: 'Silakan login terlebih dahulu untuk menyimpan perhitungan.',
+            BACKEND_ERROR: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.',
+            INVALID_BACKEND_URL: 'Backend URL belum dikonfigurasi. Hubungi administrator.'
+        },
+        
+        // API Endpoints
+        API: {
+            GET_USER_INFO: '?action=getUserInfo',
+            GET_HISTORY: '?action=getHistory&limit=',
+            SAVE_CALCULATION: '', // POST to base URL
+            DELETE_CALCULATION: '' // POST to base URL
+        },
+        
+        // Version
+        VERSION: '2.0'
+    };
+    
+    /**
+     * Validate configuration saat page load
+     * Ensures critical config tidak missing
+     */
+    function validateConfig() {
+        if (CONFIG.BACKEND_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+            console.warn('Backend URL belum dikonfigurasi! Save features tidak akan berfungsi.');
+            return false;
+        }
+        return true;
+    }
+    
+    // ============================================================================
+    // DATA TABLES - TERZAGHI BEARING CAPACITY FACTORS
+    // ============================================================================
+    
+    // Data Tabel Faktor Daya Dukung Terzaghi (General Shear)
+    const generalShearFactors = [
+
+        { phi: 0, Nc: 5.70, Nq: 1.00, Ng: 0.00 }, { phi: 1, Nc: 6.00, Nq: 1.10, Ng: 0.01 },
+        { phi: 2, Nc: 6.30, Nq: 1.22, Ng: 0.04 }, { phi: 3, Nc: 6.62, Nq: 1.35, Ng: 0.06 },
+        { phi: 4, Nc: 6.97, Nq: 1.49, Ng: 0.10 }, { phi: 5, Nc: 7.34, Nq: 1.64, Ng: 0.14 },
+        { phi: 6, Nc: 7.73, Nq: 1.81, Ng: 0.20 }, { phi: 7, Nc: 8.15, Nq: 2.00, Ng: 0.27 },
+        { phi: 8, Nc: 8.60, Nq: 2.21, Ng: 0.35 }, { phi: 9, Nc: 9.09, Nq: 2.44, Ng: 0.44 },
+        { phi: 10, Nc: 9.61, Nq: 2.69, Ng: 0.56 }, { phi: 11, Nc: 10.16, Nq: 2.98, Ng: 0.69 },
+        { phi: 12, Nc: 10.76, Nq: 3.29, Ng: 0.85 }, { phi: 13, Nc: 11.41, Nq: 3.63, Ng: 1.04 },
+        { phi: 14, Nc: 12.11, Nq: 4.02, Ng: 1.26 }, { phi: 15, Nc: 12.86, Nq: 4.45, Ng: 1.52 },
+        { phi: 16, Nc: 13.68, Nq: 4.92, Ng: 1.82 }, { phi: 17, Nc: 14.60, Nq: 5.45, Ng: 2.18 },
+        { phi: 18, Nc: 15.12, Nq: 6.04, Ng: 2.59 }, { phi: 19, Nc: 16.56, Nq: 6.70, Ng: 3.07 },
+        { phi: 20, Nc: 17.69, Nq: 7.44, Ng: 3.64 }, { phi: 21, Nc: 18.92, Nq: 8.26, Ng: 4.31 },
+        { phi: 22, Nc: 20.27, Nq: 9.19, Ng: 5.09 }, { phi: 23, Nc: 21.75, Nq: 10.23, Ng: 6.00 },
+        { phi: 24, Nc: 23.36, Nq: 11.40, Ng: 7.08 }, { phi: 25, Nc: 25.13, Nq: 12.72, Ng: 8.34 },
+        { phi: 26, Nc: 27.09, Nq: 14.21, Ng: 9.84 }, { phi: 27, Nc: 29.24, Nq: 15.90, Ng: 11.60 },
+        { phi: 28, Nc: 31.61, Nq: 17.81, Ng: 13.70 }, { phi: 29, Nc: 34.24, Nq: 19.98, Ng: 16.18 },
+        { phi: 30, Nc: 37.16, Nq: 22.46, Ng: 19.13 }, { phi: 31, Nc: 40.41, Nq: 25.28, Ng: 22.65 },
+        { phi: 32, Nc: 44.04, Nq: 28.52, Ng: 26.87 }, { phi: 33, Nc: 48.09, Nq: 32.23, Ng: 31.94 },
+        { phi: 34, Nc: 52.64, Nq: 36.50, Ng: 38.04 }, { phi: 35, Nc: 57.75, Nq: 41.44, Ng: 45.41 },
+        { phi: 36, Nc: 63.53, Nq: 47.16, Ng: 54.36 }, { phi: 37, Nc: 70.01, Nq: 53.80, Ng: 65.27 },
+        { phi: 38, Nc: 77.50, Nq: 61.55, Ng: 78.61 }, { phi: 39, Nc: 85.97, Nq: 70.61, Ng: 95.03 },
+        { phi: 40, Nc: 95.66, Nq: 81.27, Ng: 115.31 }, { phi: 41, Nc: 106.81, Nq: 93.85, Ng: 140.51 },
+        { phi: 42, Nc: 119.67, Nq: 108.75, Ng: 171.99 }, { phi: 43, Nc: 134.58, Nq: 126.50, Ng: 211.56 },
+        { phi: 44, Nc: 151.95, Nq: 147.74, Ng: 261.60 }, { phi: 45, Nc: 172.28, Nq: 173.28, Ng: 325.34 },
+        { phi: 46, Nc: 196.22, Nq: 204.19, Ng: 407.11 }, { phi: 47, Nc: 224.55, Nq: 241.80, Ng: 512.84 },
+        { phi: 48, Nc: 258.28, Nq: 287.85, Ng: 650.67 }, { phi: 49, Nc: 298.71, Nq: 344.63, Ng: 831.99 },
+        { phi: 50, Nc: 347.50, Nq: 415.14, Ng: 1072.80 }
+    ];
+
+    // Data Tabel Faktor Daya Dukung Terzaghi (Local Shear)
+    const localShearFactors = [
+        { phi: 0, NcP: 5.70, NqP: 1.00, NgP: 0.00 }, { phi: 1, NcP: 5.90, NqP: 1.07, NgP: 0.005 },
+        { phi: 2, NcP: 6.10, NqP: 1.14, NgP: 0.02 }, { phi: 3, NcP: 6.30, NqP: 1.22, NgP: 0.04 },
+        { phi: 4, NcP: 6.51, NqP: 1.30, NgP: 0.055 }, { phi: 5, NcP: 6.74, NqP: 1.39, NgP: 0.074 },
+        { phi: 6, NcP: 6.97, NqP: 1.49, NgP: 0.10 }, { phi: 7, NcP: 7.22, NqP: 1.59, NgP: 0.128 },
+        { phi: 8, NcP: 7.47, NqP: 1.70, NgP: 0.16 }, { phi: 9, NcP: 7.74, NqP: 1.82, NgP: 0.20 },
+        { phi: 10, NcP: 8.02, NqP: 1.94, NgP: 0.24 }, { phi: 11, NcP: 8.32, NqP: 2.08, NgP: 0.30 },
+        { phi: 12, NcP: 8.63, NqP: 2.22, NgP: 0.35 }, { phi: 13, NcP: 8.96, NqP: 2.38, NgP: 0.42 },
+        { phi: 14, NcP: 9.31, NqP: 2.55, NgP: 0.48 }, { phi: 15, NcP: 9.67, NqP: 2.73, NgP: 0.57 },
+        { phi: 16, NcP: 10.06, NqP: 2.92, NgP: 0.67 }, { phi: 17, NcP: 10.47, NqP: 3.13, NgP: 0.76 },
+        { phi: 18, NcP: 10.90, NqP: 3.36, NgP: 0.88 }, { phi: 19, NcP: 11.36, NqP: 3.61, NgP: 1.03 },
+        { phi: 20, NcP: 11.85, NqP: 3.88, NgP: 1.12 }, { phi: 21, NcP: 12.37, NqP: 4.17, NgP: 1.35 },
+        { phi: 22, NcP: 12.92, NqP: 4.48, NgP: 1.55 }, { phi: 23, NcP: 13.51, NqP: 4.82, NgP: 1.74 },
+        { phi: 24, NcP: 14.14, NqP: 5.20, NgP: 1.97 }, { phi: 25, NcP: 14.80, NqP: 5.60, NgP: 2.25 },
+        { phi: 26, NcP: 15.53, NqP: 6.05, NgP: 2.59 }, { phi: 27, NcP: 16.30, NqP: 6.54, NgP: 2.88 },
+        { phi: 28, NcP: 17.13, NqP: 7.07, NgP: 3.29 }, { phi: 29, NcP: 18.03, NqP: 7.66, NgP: 3.76 },
+        { phi: 30, NcP: 18.99, NqP: 8.31, NgP: 4.39 }, { phi: 31, NcP: 20.03, NqP: 9.03, NgP: 4.83 },
+        { phi: 32, NcP: 21.16, NqP: 9.82, NgP: 5.51 }, { phi: 33, NcP: 22.39, NqP: 10.69, NgP: 6.32 },
+        { phi: 34, NcP: 23.72, NqP: 11.67, NgP: 7.22 }, { phi: 35, NcP: 25.18, NqP: 12.75, NgP: 8.35 },
+        { phi: 36, NcP: 26.77, NqP: 13.97, NgP: 9.41 }, { phi: 37, NcP: 28.51, NqP: 15.32, NgP: 10.90 },
+        { phi: 38, NcP: 30.43, NqP: 16.85, NgP: 12.75 }, { phi: 39, NcP: 32.53, NqP: 18.56, NgP: 14.71 },
+        { phi: 40, NcP: 34.87, NqP: 20.50, NgP: 17.22 }, { phi: 41, NcP: 37.45, NqP: 22.70, NgP: 19.75 },
+        { phi: 42, NcP: 40.33, NqP: 25.21, NgP: 22.50 }, { phi: 43, NcP: 43.54, NqP: 28.06, NgP: 26.25 },
+        { phi: 44, NcP: 47.13, NqP: 31.34, NgP: 30.40 }, { phi: 45, NcP: 51.17, NqP: 35.11, NgP: 36.00 },
+        { phi: 46, NcP: 55.73, NqP: 39.48, NgP: 41.70 }, { phi: 47, NcP: 60.91, NqP: 44.45, NgP: 49.30 },
+        { phi: 48, NcP: 66.80, NqP: 50.46, NgP: 59.25 }, { phi: 49, NcP: 73.55, NqP: 57.41, NgP: 71.45 },
+        { phi: 50, NcP: 81.31, NqP: 65.60, NgP: 85.75 }
+    ];
+
+    function getElementValue(id) {
+        const value = document.getElementById(id).value;
+        return value === "" ? null : parseFloat(value);
+    }
+
+    function displayMessage(message, type = 'info') {
+        const messageArea = document.getElementById('messageArea');
+        const messageClass = type === 'error' ? 'error-message' : 'info-message';
+        messageArea.innerHTML = `<div class="${messageClass}">${message}</div>`;
+    }
+    
+    function clearMessages() {
+        document.getElementById('messageArea').innerHTML = '';
+        document.getElementById('formulaDisplayContainer').style.display = 'none';
+        document.getElementById('formulaText').innerHTML = '';
+    }
+    
+    // ============================================================================
+    // UTILITY FUNCTIONS - API & STORAGE
+    // ============================================================================
+    
+    /**
+     * Make API call ke backend Apps Script
+     * Centralized function untuk semua  HTTP requests
+     * 
+     * @param {string} endpoint - API endpoint (akan ditambah ke BASE_URL)
+     * @param {Object} options - fetch options (method, body, etc)
+     * @returns {Promise<Object>} Response data
+     */
+    async function apiCall(endpoint, options = {}) {
+        try {
+            // Validate backend URL configured
+            if (!validateConfig()) {
+                throw new Error(CONFIG.MSG.INVALID_BACKEND_URL);
+            }
+            
+            const url = CONFIG.BACKEND_URL + endpoint;
+            
+            // Default options
+            const defaultOptions = {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            // Merge options
+            const fetchOptions = { ...defaultOptions, ...options };
+            
+            // Show loading indicator
+            showLoading(true);
+            
+            // Make request with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), CONFIG.LOADING_TIMEOUT);
+            
+            const response = await fetch(url, {
+                ...fetchOptions,
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            // Parse JSON response
+            const data = await response.json();
+            
+            // Hide loading
+            showLoading(false);
+            
+            // Check if response indicates error
+            if (!data.success) {
+                throw new Error(data.error || 'Unknown error from backend');
+            }
+            
+            return data;
+            
+        } catch (error) {
+            showLoading(false);
+            console.error('API call error:', error);
+            
+            // User-friendly error message
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout. Silakan coba lagi.');
+            }
+            
+            throw error;
+        }
+    }
+    
+    /**
+     * LocalStorage helpers - dengan error handling
+     */
+    const Storage = {
+        get(key, defaultValue = null) {
+            try {
+                const value = localStorage.getItem(key);
+                return value !== null ? JSON.parse(value) : defaultValue;
+            } catch (error) {
+                console.error('Storage get error:', error);
+                return defaultValue;
+            }
+        },
+        
+        set(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (error) {
+                console.error('Storage set error:', error);
+                return false;
+            }
+        },
+        
+        remove(key) {
+            try {
+                localStorage.removeItem(key);
+                return true;
+            } catch (error) {
+                console.error('Storage remove error:', error);
+                return false;
+            }
+        },
+        
+        clear() {
+            try {
+                localStorage.clear();
+                return true;
+            } catch (error) {
+                console.error('Storage clear error:', error);
+                return false;
+            }
+        }
+    };
+    
+    /**
+     * Show notification message dengan auto-hide
+     * 
+     * @param {string} message - Message text
+     * @param {string} type - 'success', 'error', 'info', 'warning'
+     */
+    function showNotification(message, type = 'info') {
+        const messageArea = document.getElementById('messageArea');
+        
+        const typeClass = {
+            'success': 'success-message',
+            'error': 'error-message',
+            'warning': 'warning-message',
+            'info': 'info-message'
+        }[type] || 'info-message';
+        
+        messageArea.innerHTML = `<div class="${typeClass}">${message}</div>`;
+        
+        // Auto-hide after configured duration
+        if (type !== 'error') { // Keep errors visible until user dismisses
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, CONFIG.NOTIFICATION_DURATION);
+        }
+    }
+    
+    /**
+     * Show/hide loading indicator
+     * 
+     * @param {boolean} show - True to show, false to hide
+     */
+    function showLoading(show) {
+        // Note: Loading UI belum ada di HTML, ini placeholder
+        // Will be implemented di FASE 4 (UI)
+        if (show) {
+            console.log('Loading...');
+            // TODO: Show spinner or loading overlay
+        } else {
+            console.log('Loading complete');
+            // TODO: Hide spinner
+        }
+    }
+    
+    /**
+     * Format date untuk display
+     * 
+     * @param {Date|string} date - Date object or string
+     * @returns {string} Formatted date string
+     */
+    function formatDate(date) {
+        try {
+            const d = new Date(date);
+            return d.toLocaleString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return date.toString();
+        }
+    }
+    
+    /**
+     * Validate email format (basic)
+     * 
+     * @param {string} email - Email to validate
+     * @returns {boolean} True if valid
+     */
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // ============================================================================
+    // EXISTING UTILITY FUNCTIONS
+    // ============================================================================
+    
+    function interpolate(phi, factorTable, factorKeyNc, factorKeyNq, factorKeyNg) {
+        phi = Math.max(0, Math.min(50, phi)); 
+
+        let lower = null;
+        let upper = null;
+
+        for (let i = 0; i < factorTable.length; i++) {
+            if (factorTable[i].phi <= phi) {
+                lower = factorTable[i];
+            }
+            if (factorTable[i].phi >= phi && upper === null) {
+                upper = factorTable[i];
+            }
+        }
+        
+        if (!lower && upper) lower = upper; 
+        if (!upper && lower) upper = lower;
+
+        if (!lower || !upper) return { Nc: null, Nq: null, Ng: null }; 
+
+        if (lower.phi === phi) return { Nc: lower[factorKeyNc], Nq: lower[factorKeyNq], Ng: lower[factorKeyNg] };
+        if (upper.phi === phi) return { Nc: upper[factorKeyNc], Nq: upper[factorKeyNq], Ng: upper[factorKeyNg] };
+        
+        if (upper.phi - lower.phi === 0) {
+            return { Nc: lower[factorKeyNc], Nq: lower[factorKeyNq], Ng: lower[factorKeyNg] };
+        }
+
+        const calc = (key) => lower[key] + ( (phi - lower.phi) * (upper[key] - lower[key]) ) / (upper.phi - lower.phi);
+        
+        return {
+            Nc: calc(factorKeyNc),
+            Nq: calc(factorKeyNq),
+            Ng: calc(factorKeyNg)
+        };
+    }
+
+    // Fungsi untuk menampilkan/menyembunyikan modal bantuan
+    function toggleHelpModal() {
+        const modal = document.getElementById('helpModal');
+        if (modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'flex';
+        }
+    }
+
+    // Fungsi untuk menutup modal jika area luar diklik
+    function closeHelpModalOutside(event) {
+        const modal = document.getElementById('helpModal');
+        if (event.target === modal) { // Hanya jika klik pada overlay, bukan konten modal
+            modal.style.display = 'none';
+        }
+    }
+
+
+    function hitungDayaDukung() {
+        clearMessages();
+
+        const tipePondasi = document.getElementById('tipePondasi').value;
+        const tipeKeruntuhan = document.getElementById('tipeKeruntuhan').value;
+        const c_input = getElementValue('kohesi');
+        const phi_input = getElementValue('sudutGeser');
+        const gamma_tanah_input = getElementValue('gammaTanah');
+        const B_m_input = getElementValue('lebarPondasi');
+        const Df_m_input = getElementValue('kedalamanPondasi');
+        const SF_input = getElementValue('faktorKeamanan');
+        const Dw_m_input = getElementValue('kedalamanMAT');
+        const gamma_sat_input = getElementValue('gammaSat');
+        const gamma_w_input = getElementValue('gammaAir');
+
+        const allInputs = { 
+            kohesi:c_input, sudutGeser:phi_input, gammaTanah:gamma_tanah_input, 
+            lebarPondasi:B_m_input, kedalamanPondasi:Df_m_input, faktorKeamanan:SF_input, 
+            kedalamanMAT:Dw_m_input, gammaSat:gamma_sat_input, gammaAir:gamma_w_input 
+        };
+        for (const key in allInputs) {
+            if (allInputs[key] === null) {
+                const labelElement = document.querySelector(`label[for=${key}]`);
+                const labelText = labelElement ? labelElement.textContent.replace(':','').trim() : key;
+                displayMessage(`Error: Input "${labelText}" tidak boleh kosong.`, 'error');
+                return;
+            }
+             if (isNaN(allInputs[key])) {
+                const labelElement = document.querySelector(`label[for=${key}]`);
+                const labelText = labelElement ? labelElement.textContent.replace(':','').trim() : key;
+                displayMessage(`Error: Input "${labelText}" harus berupa angka.`, 'error');
+                return;
+            }
+        }
+        if (phi_input < 0 || phi_input > 50) { displayMessage("Error: Sudut geser (φ) harus antara 0 dan 50 derajat.", 'error'); return; }
+        if (SF_input <= 0) { displayMessage("Error: Faktor Keamanan (SF) harus lebih besar dari 0.", 'error'); return; }
+        if (B_m_input <= 0 || Df_m_input < 0 ) { displayMessage("Error: Lebar Pondasi (B) harus positif dan Kedalaman (Df) tidak boleh negatif.", 'error'); return; }
+        if (Dw_m_input < 0) { displayMessage("Error: Kedalaman MAT (Dw) tidak boleh negatif.", 'error'); return; }
+        if (gamma_sat_input <= 0 || gamma_w_input <= 0 || gamma_tanah_input <=0) {displayMessage("Error: Nilai berat volume (gamma) harus positif.", 'error'); return;}
+        if (gamma_sat_input < gamma_w_input) {displayMessage("Error: Gamma jenuh (γsat) harus lebih besar atau sama dengan gamma air (γw).", 'error'); return;}
+
+        const c = c_input; 
+        const phi = phi_input; 
+        const gamma = gamma_tanah_input; 
+        const B_cm = B_m_input * 100;
+        const Df_cm = Df_m_input * 100;
+        const SF = SF_input;
+        const Dw_cm = Dw_m_input * 100;
+        const gamma_sat = gamma_sat_input; 
+        const gamma_w = gamma_w_input; 
+
+        const gamma_prima = gamma_sat - gamma_w; 
+        document.getElementById('hasilGammaPrima').textContent = gamma_prima.toFixed(4);
+
+        let factors;
+        let c_eff = c;
+        let Nc_symbol = "N<sub>c</sub>";
+        let Nq_symbol = "N<sub>q</sub>";
+        let Ng_symbol = "N<sub>γ</sub>";
+        let c_symbol = "c";
+
+        document.getElementById('cPrimaRow').style.display = 'none';
+
+        if (tipeKeruntuhan === 'umum') {
+            factors = interpolate(phi, generalShearFactors, 'Nc', 'Nq', 'Ng');
+        } else { // lokal
+            factors = interpolate(phi, localShearFactors, 'NcP', 'NqP', 'NgP');
+            c_eff = (2/3) * c;
+            Nc_symbol = "N'<sub>c</sub>";
+            Nq_symbol = "N'<sub>q</sub>";
+            Ng_symbol = "N'<sub>γ</sub>";
+            c_symbol = "c'";
+            document.getElementById('hasilCprime').textContent = c_eff.toFixed(3);
+            document.getElementById('cPrimaRow').style.display = 'flex';
+        }
+
+        if (factors.Nc === null || factors.Nq === null || factors.Ng === null || isNaN(factors.Nc) || isNaN(factors.Nq) || isNaN(factors.Ng) ) {
+            displayMessage("Error: Tidak dapat menghitung faktor daya dukung (hasil interpolasi NaN atau null). Periksa nilai sudut geser.", 'error');
+            document.getElementById('hasilNc').textContent = '-';
+            document.getElementById('hasilNq').textContent = '-';
+            document.getElementById('hasilNgamma').textContent = '-';
+            return;
+        }
+        const { Nc, Nq, Ng } = factors;
+
+        let q_adjusted_for_MAT; 
+        let gamma_effective_for_MAT; 
+
+        if (Dw_cm < Df_cm) { 
+            q_adjusted_for_MAT = (gamma * Dw_cm) + (gamma_prima * (Df_cm - Dw_cm));
+            gamma_effective_for_MAT = gamma_prima;
+        } else if (Dw_cm === Df_cm) { 
+            q_adjusted_for_MAT = gamma * Df_cm;
+            gamma_effective_for_MAT = gamma_prima;
+        } else { 
+            q_adjusted_for_MAT = gamma * Df_cm;
+            const d_cm = Dw_cm - Df_cm; 
+            if (d_cm >= B_cm) { 
+                gamma_effective_for_MAT = gamma;
+            } else { 
+                gamma_effective_for_MAT = gamma_prima + (d_cm / B_cm) * (gamma - gamma_prima);
+            }
+        }
+        
+        document.getElementById('hasilQadj').textContent = q_adjusted_for_MAT.toFixed(3);
+        document.getElementById('hasilGammaEff').textContent = gamma_effective_for_MAT.toFixed(4);
+
+        let q_ult;
+        let formulaString = "";
+        let sc_val = 1, sq_val = 1, sg_val = 1; // Faktor bentuk Terzaghi
+
+        if (tipePondasi === 'lajur') {
+             q_ult = (c_eff * Nc) + (q_adjusted_for_MAT * Nq) + (0.5 * gamma_effective_for_MAT * B_cm * Ng);
+             formulaString = `q<sub>ult</sub> = (${c_symbol} × ${Nc_symbol}) + (q<sub>adj</sub> × ${Nq_symbol}) + (0.5 × γ<sub>eff</sub> × B × ${Ng_symbol})`;
+        } else if (tipePondasi === 'bujursangkar') {
+            if (tipeKeruntuhan === 'umum') {
+                sc_val = 1.3; sg_val = 0.8; // sq = 1
+                q_ult = (c_eff * Nc * sc_val) + (q_adjusted_for_MAT * Nq * sq_val) + (0.5 * gamma_effective_for_MAT * B_cm * Ng * sg_val);
+                formulaString = `q<sub>ult</sub> = (${sc_val.toString().replace('.',',')} × ${c_symbol} × ${Nc_symbol}) + (q<sub>adj</sub> × ${Nq_symbol}) + (0.5 × γ<sub>eff</sub> × B × ${Ng_symbol} × ${sg_val.toString().replace('.',',')})`;
+            } else { 
+                q_ult = (0.867 * c_eff * Nc) + (q_adjusted_for_MAT * Nq) + (0.4 * gamma_effective_for_MAT * B_cm * Ng);
+                formulaString = `q<sub>ult</sub> = (0,867 × ${c_symbol} × ${Nc_symbol}) + (q<sub>adj</sub> × ${Nq_symbol}) + (0,4 × γ<sub>eff</sub> × B × ${Ng_symbol})`;
+            }
+        } else { // lingkaran
+             if (tipeKeruntuhan === 'umum') {
+                sc_val = 1.3; sg_val = 0.6; // sq = 1
+                q_ult = (c_eff * Nc * sc_val) + (q_adjusted_for_MAT * Nq * sq_val) + (0.5 * gamma_effective_for_MAT * B_cm * Ng * sg_val);
+                formulaString = `q<sub>ult</sub> = (${sc_val.toString().replace('.',',')} × ${c_symbol} × ${Nc_symbol}) + (q<sub>adj</sub> × ${Nq_symbol}) + (0.5 × γ<sub>eff</sub> × B × ${Ng_symbol} × ${sg_val.toString().replace('.',',')})`;
+            } else { 
+                q_ult = (0.867 * c_eff * Nc) + (q_adjusted_for_MAT * Nq) + (0.3 * gamma_effective_for_MAT * B_cm * Ng);
+                formulaString = `q<sub>ult</sub> = (0,867 × ${c_symbol} × ${Nc_symbol}) + (q<sub>adj</sub> × ${Nq_symbol}) + (0,3 × γ<sub>eff</sub> × B × ${Ng_symbol})`;
+            }
+        }
+
+        const q_all = q_ult / SF;
+
+        document.getElementById('hasilNc').textContent = Nc.toFixed(2);
+        document.getElementById('hasilNq').textContent = Nq.toFixed(2);
+        document.getElementById('hasilNgamma').textContent = Ng.toFixed(3);
+        document.getElementById('hasilQult').textContent = q_ult.toFixed(3);
+        document.getElementById('hasilQall').textContent = q_all.toFixed(3);
+
+        // Tampilkan formula yang digunakan
+        document.getElementById('formulaText').innerHTML = formulaString.replace(/\*/g, '×'); // Ganti * dengan × untuk tampilan
+        document.getElementById('formulaDisplayContainer').style.display = 'block';
+    }
+</script>
+
+<!-- Save Features JavaScript -->
+<script src="save-features.js"></script>
+
+<!-- History Modal -->
+<div id="historyModal" class="history-modal" onclick="closeHistoryModal(event)">
+    <div class="history-content" onclick="event.stopPropagation()">
+        <!-- Header -->
+        <div class="history-header">
+            <h3>📋 Riwayat Perhitungan</h3>
+            <button class="history-close-button" onclick="closeHistoryModal()">×</button>
+        </div>
+        
+        <!-- Body -->
+        <div class="history-body">
+            <!-- Loading state -->
+            <div id="historyLoading" style="display: none; text-align: center; padding: 2rem;">
+                <div style="display: inline-block; border: 3px solid #f3f3f3; border-top: 3px solid #0062e6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 1rem; color: #7f8c8d;">Memuat riwayat...</p>
+            </div>
+            
+            <!-- Empty state -->
+            <div id="historyEmpty" class="history-empty" style="display: none;">
+                <p>📭 Belum ada perhitungan yang disimpan.</p>
+                <p style="font-size: 0.9rem; color: #95a5a6;">
+                    Lakukan perhitungan dan klik "Simpan ke Google Sheet" untuk menyimpan.
+                </p>
+            </div>
+            
+            <!-- History list -->
+            <div id="historyList" class="history-list">
+                <!-- History items will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay - Global loading indicator -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+</body>
+</html>
