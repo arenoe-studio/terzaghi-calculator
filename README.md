@@ -26,7 +26,7 @@ Kalkulator online untuk analisis daya dukung pondasi dangkal menggunakan metode 
 
 ### For Users
 
-1. **Buka calculator**: [yourusername.github.io/terzaghi-calculator](https://yourusername.github.io/terzaghi-calculator)
+1. **Buka calculator**: [arenoe-studio.github.io/terzaghi-calculator](https://arenoe-studio.github.io/terzaghi-calculator)
 2. **Gunakan tanpa login**: Langsung hitung daya dukung
 3. **Aktifkan save (optional)**:
    - Toggle "Aktifkan Penyimpanan" ON
@@ -39,7 +39,7 @@ Kalkulator online untuk analisis daya dukung pondasi dangkal menggunakan metode 
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/terzaghi-calculator.git
+git clone https://github.com/arenoe-studio/terzaghi-calculator.git
 cd terzaghi-calculator
 
 # Buka di browser
@@ -58,7 +58,7 @@ terzaghi-calculator/
 │   └── styles.css
 ├── 📁 js/                           # JavaScript modules
 │   ├── config.js                    # Configuration
-│   ├── calculator.js                # Calculator logic
+│   ├── calculator.js                # Core Calculation Logic (Smart Conversion)
 │   └── save-features.js             # Save/history features
 │
 ├── 📁 gas-backend/                  # Google Apps Script backend
@@ -68,27 +68,16 @@ terzaghi-calculator/
 │   └── appsscript.json              # Manifest
 │
 ├── 📁 docs/                         # Documentation (organized)
-│   ├── architecture/                # System design docs
-│   │   ├── ARCHITECTURE.md
-│   │   ├── ARCHITECTURE_VISUAL.md
-│   │   ├── PRD.md
-│   │   └── PROJECT_STRUCTURE.md
-│   ├── guides/                      # User guides
-│   │   ├── QUICK_START.md
-│   │   ├── DEPLOYMENT_CHECKLIST.md
-│   │   └── FRONTEND_COMPONENTS.md
-│   ├── development/                 # Dev history
-│   │   ├── FASE3_SUMMARY.md
-│   │   ├── FASE4_SUMMARY.md
-│   │   ├── FINAL_SUMMARY.md
-│   │   └── REFACTORING_*.md
+│   ├── architecture/                # System design docs (ARCHITECTURE, FOLDER_STRUCTURE)
+│   ├── guides/                      # User & Developer guides
+│   ├── development/                 # Dev history & Refactoring logs
 │   └── api/                         # API docs (future)
 │
 ├── 📁 assets/                       # Images & screenshots
 │   └── images/
 ├── 📁 tests/                        # Testing materials
-├── 📁 scripts/                      # Utility scripts
-└── 📁 archive/                      # Old versions
+├── 📁 scripts/                      # Utility scripts (Python, PowerShell)
+└── 📁 archive/                      # Old versions (Legacy backup)
 ```
 
 **New in v2.1**: Restructured for better organization and maintainability
@@ -163,7 +152,7 @@ MIT License - feel free to use for educational or commercial purposes.
 
 ## 👨‍💻 Authors
 
-**[Your Name]**
+**Arenoe Studio**
 
 - D4 Teknologi Rekayasa Konstruksi Bangunan Air
 - Institut Teknologi Sepuluh Nopember
@@ -178,9 +167,9 @@ MIT License - feel free to use for educational or commercial purposes.
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/terzaghi-calculator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/terzaghi-calculator/discussions)
-- **Email**: your.email@example.com
+- **Issues**: [GitHub Issues](https://github.com/arenoe-studio/terzaghi-calculator/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/arenoe-studio/terzaghi-calculator/discussions)
+- **Email**: arenoe.studio@gmail.com
 
 ---
 

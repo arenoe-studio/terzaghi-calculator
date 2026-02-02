@@ -18,19 +18,10 @@
 </head>
 <body>
 
-<!-- Save Feature Toggle - Fixed position top right -->
-<div class="save-toggle-container">
-    <span class="save-toggle-label">Aktifkan Penyimpanan</span>
-    <label class="toggle-switch">
-        <input type="checkbox" id="saveFeatureToggle" onchange="toggleSaveFeature()">
-        <span class="toggle-slider"></span>
-    </label>
-</div>
-
 <div class="header-container">
     <div class="header-logos">
-        <img src="https://placehold.co/150x50/003366/FFFFFF?text=Logo+ITS&font=montserrat" alt="Logo ITS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/150x50/cccccc/000000?text=Logo+ITS+Error';">
-        <img src="https://placehold.co/60x60/FFFFFF/0052CC?text=HMDS&font=montserrat" alt="Logo HMDS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/cccccc/000000?text=Logo+HMDS+Error';">
+        <img src="assets/images/logo-its.png" alt="Logo ITS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/150x50/cccccc/000000?text=Logo+ITS+Error';">
+        <img src="assets/images/logo-hmds.png" alt="Logo HMDS" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/cccccc/000000?text=Logo+HMDS+Error';">
     </div>
     <div class="header-title">Rekayasa Pondasi</div>
 </div>
@@ -44,7 +35,7 @@
         <div class="login-content">
             <!-- Not logged in state -->
             <div id="loginPrompt" class="login-info">
-                <h4>ðŸ’¾ Simpan Riwayat Perhitungan</h4>
+                <h4>💾 Simpan Riwayat Perhitungan</h4>
                 <p style="margin: 0; font-size: 0.9rem; color: #566573;">
                     Login dengan Google untuk menyimpan perhitungan Anda ke Google Sheets pribadi.
                 </p>
@@ -55,7 +46,7 @@
                 <h4>Selamat datang!</h4>
                 <p class="user-email" id="userEmail">-</p>
                 <span class="privacy-badge">
-                    <span>ðŸ”’</span> Data tersimpan di Drive Anda
+                    <span>🔒</span> Data tersimpan di Drive Anda
                 </span>
             </div>
             
@@ -71,7 +62,7 @@
         </div>
     </div>
     
-    <!-- Input Fields (tidak berubah, sama seperti sebelumnya) -->
+    <!-- Input Fields -->
     <div class="section-title">Parameter Dasar Pondasi & Tanah</div>
     <div class="input-grid mb-6">
         <div class="input-group">
@@ -93,21 +84,29 @@
             <label for="kohesi">Kohesi Tanah (c):</label>
             <div class="flex items-center">
                 <input type="number" id="kohesi" step="any" class="input-field" placeholder="e.g., 0.1">
-                <span class="unit-text">kg/cmÂ²</span>
+                <select id="unit_kohesi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="kgcm2">kg/cm²</option>
+                    <option value="tonm2">Ton/m²</option>
+                    <option value="knm2">kN/m²</option>
+                </select>
             </div>
         </div>
         <div class="input-group">
-            <label for="sudutGeser">Sudut Geser Dalam (Ï†):</label>
+            <label for="sudutGeser">Sudut Geser Dalam (φ):</label>
              <div class="flex items-center">
                 <input type="number" id="sudutGeser" step="any" class="input-field" placeholder="e.g., 25">
                 <span class="unit-text">derajat</span>
             </div>
         </div>
         <div class="input-group">
-            <label for="gammaTanah">Berat Vol. Tanah (Î³) (di atas MAT/lembab):</label>
+            <label for="gammaTanah">Berat Vol. Tanah (γ) (di atas MAT/lembab):</label>
             <div class="flex items-center">
                 <input type="number" id="gammaTanah" step="any" class="input-field" placeholder="e.g., 0.0018">
-                <span class="unit-text">kg/cmÂ³</span>
+                <select id="unit_gammaTanah" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="kgcm3">kg/cm³</option>
+                    <option value="tonm3">Ton/m³</option>
+                    <option value="knm3">kN/m³</option>
+                </select>
             </div>
         </div>
         <div class="input-group">
@@ -142,17 +141,25 @@
             </div>
         </div>
         <div class="input-group">
-            <label for="gammaSat">Berat Volume Jenuh Tanah (Î³<sub>sat</sub>):</label>
+            <label for="gammaSat">Berat Volume Jenuh Tanah (γ<sub>sat</sub>):</label>
             <div class="flex items-center">
                 <input type="number" id="gammaSat" step="any" class="input-field" placeholder="e.g., 0.0020">
-                <span class="unit-text">kg/cmÂ³</span>
+                <select id="unit_gammaSat" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="kgcm3">kg/cm³</option>
+                    <option value="tonm3">Ton/m³</option>
+                    <option value="knm3">kN/m³</option>
+                </select>
             </div>
         </div>
         <div class="input-group">
-            <label for="gammaAir">Berat Volume Air (Î³<sub>w</sub>):</label>
+            <label for="gammaAir">Berat Volume Air (γ<sub>w</sub>):</label>
             <div class="flex items-center">
                 <input type="number" id="gammaAir" step="any" class="input-field" value="0.001">
-                <span class="unit-text">kg/cmÂ³</span>
+                <select id="unit_gammaAir" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                    <option value="kgcm3">kg/cm³</option>
+                    <option value="tonm3">Ton/m³</option>
+                    <option value="knm3">kN/m³</option>
+                </select>
             </div>
         </div>
     </div>
@@ -170,28 +177,28 @@
             <span class="result-unit-text"></span> 
         </div>
         <div class="result-entry">
-            <div class="result-item"><strong>Faktor Daya Dukung (NÎ³ / N'Î³):</strong> <span id="hasilNgamma" class="value">-</span></div>
+            <div class="result-item"><strong>Faktor Daya Dukung (Nγ / N'γ):</strong> <span id="hasilNgamma" class="value">-</span></div>
             <span class="result-unit-text"></span> 
         </div>
         <div class="result-entry" id="cPrimaRow" style="display:none;">
             <div class="result-item"><strong>Kohesi Modifikasi (c'):</strong> <span id="hasilCprime" class="value">-</span></div>
-            <span class="result-unit-text">kg/cmÂ²</span>
+            <span class="result-unit-text">kg/cm²</span>
         </div>
         <div class="result-entry">
-            <div class="result-item"><strong>Berat Vol. Efektif (Î³') (Apung):</strong> <span id="hasilGammaPrima" class="value">-</span></div>
-            <span class="result-unit-text">kg/cmÂ³</span>
+            <div class="result-item"><strong>Berat Vol. Efektif (γ') (Apung):</strong> <span id="hasilGammaPrima" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm³</span>
         </div>
         <div class="result-entry">
             <div class="result-item"><strong>Tekanan Overburden Efektif (q<sub>adj</sub>):</strong> <span id="hasilQadj" class="value">-</span></div>
-            <span class="result-unit-text">kg/cmÂ²</span>
+            <span class="result-unit-text">kg/cm²</span>
         </div>
         <div class="result-entry">
-            <div class="result-item"><strong>Berat Vol. Efektif untuk Suku ke-3 (Î³<sub>eff</sub>):</strong> <span id="hasilGammaEff" class="value">-</span></div>
-            <span class="result-unit-text">kg/cmÂ³</span>
+            <div class="result-item"><strong>Berat Vol. Efektif untuk Suku ke-3 (γ<sub>eff</sub>):</strong> <span id="hasilGammaEff" class="value">-</span></div>
+            <span class="result-unit-text">kg/cm³</span>
         </div>
         <div class="result-entry">
             <div class="result-item"><strong>Daya Dukung Ultimit (q<sub>ult</sub>):</strong> <span id="hasilQult" class="value">-</span></div>
-            <span class="result-unit-text">kg/cmÂ²</span>
+            <span class="result-unit-text">kg/cm²</span>
         </div>
         <div id="formulaDisplayContainer" class="formula-display" style="display:none; grid-column: 1 / -1;">
              <strong>Rumus q<sub>ult</sub> yang digunakan:</strong><br>
@@ -199,13 +206,13 @@
         </div>
         <div class="result-entry">
             <div class="result-item"><strong>Daya Dukung Aman (q<sub>all</sub>):</strong> <span id="hasilQall" class="value">-</span></div>
-            <span class="result-unit-text">kg/cmÂ²</span>
+            <span class="result-unit-text">kg/cm²</span>
         </div>
     </div>
 
-    <!-- Save Calculation Section - Shows when logged in and results calculated -->
+    <!-- Save Calculation Section -->
     <div id="saveSection" class="save-section">
-        <h4>ðŸ’¾ Simpan Perhitungan Ini</h4>
+        <h4>💾 Simpan Perhitungan Ini</h4>
         
         <div class="save-input-group">
             <label for="calculationDescription">Nama/Deskripsi (Opsional):</label>
@@ -218,13 +225,22 @@
         </div>
         
         <button class="save-button" onclick="saveCalculationToSheet()">
-            <span>ðŸ’¾</span>
+            <span>💾</span>
             <span id="saveButtonText">Simpan ke Google Sheet</span>
         </button>
         
         <button class="history-button" onclick="showHistoryModal()">
-            <span>ðŸ“‹</span> Lihat Riwayat Perhitungan
+            <span>📋</span> Lihat Riwayat Perhitungan
         </button>
+    </div>
+
+    <!-- Save Feature Toggle - Moved to Bottom -->
+    <div class="save-toggle-container">
+        <span class="save-toggle-label">Aktifkan Fitur Penyimpanan:</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="saveFeatureToggle" onchange="toggleSaveFeature()">
+            <span class="toggle-slider"></span>
+        </label>
     </div>
 
     <div class="watermark">
@@ -248,59 +264,59 @@
             <p>Terjadi pada tanah padat atau kaku. Formula daya dukung ultimit (q<sub>ult</sub>) Terzaghi:</p>
             <ul>
                 <li><strong>Pondasi Lajur (Strip):</strong> 
-                    <div class="formula">q<sub>ult</sub> = cÂ·N<sub>c</sub> + qÂ·N<sub>q</sub> + 0.5Â·Î³<sub>eff</sub>Â·BÂ·N<sub>Î³</sub></div></li>
+                    <div class="formula">q<sub>ult</sub> = c·N<sub>c</sub> + q·N<sub>q</sub> + 0.5·γ<sub>eff</sub>·B·N<sub>γ</sub></div></li>
                 <li><strong>Pondasi Bujursangkar (Square):</strong> 
-                    <div class="formula">q<sub>ult</sub> = 1.3Â·cÂ·N<sub>c</sub> + qÂ·N<sub>q</sub> + 0.4Â·Î³<sub>eff</sub>Â·BÂ·N<sub>Î³</sub></div></li>
+                    <div class="formula">q<sub>ult</sub> = 1.3·c·N<sub>c</sub> + q·N<sub>q</sub> + 0.4·γ<sub>eff</sub>·B·N<sub>γ</sub></div></li>
                 <li><strong>Pondasi Lingkaran (Circular):</strong> 
-                    <div class="formula">q<sub>ult</sub> = 1.3Â·cÂ·N<sub>c</sub> + qÂ·N<sub>q</sub> + 0.3Â·Î³<sub>eff</sub>Â·BÂ·N<sub>Î³</sub></div></li>
+                    <div class="formula">q<sub>ult</sub> = 1.3·c·N<sub>c</sub> + q·N<sub>q</sub> + 0.3·γ<sub>eff</sub>·B·N<sub>γ</sub></div></li>
             </ul>
-            <p>Dimana: c = kohesi tanah, q = tekanan overburden efektif di dasar pondasi, Î³<sub>eff</sub> = berat volume efektif tanah di bawah dasar pondasi, B = lebar/diameter pondasi, N<sub>c</sub>, N<sub>q</sub>, N<sub>Î³</sub> = faktor daya dukung Terzaghi (fungsi dari Ï†).</p>
+            <p>Dimana: c = kohesi tanah, q = tekanan overburden efektif di dasar pondasi, γ<sub>eff</sub> = berat volume efektif tanah di bawah dasar pondasi, B = lebar/diameter pondasi, N<sub>c</sub>, N<sub>q</sub>, N<sub>γ</sub> = faktor daya dukung Terzaghi (fungsi dari φ).</p>
         </div>
 
         <div class="modal-section">
             <h4>Keruntuhan Geser Lokal (Local Shear Failure)</h4>
             <p>Terjadi pada tanah lepas atau lunak. Parameter tanah yang dimodifikasi digunakan:</p>
             <ul>
-                <li>Kohesi modifikasi: <div class="formula">c' = (2/3)Â·c</div></li>
-                <li>Faktor daya dukung yang digunakan adalah N'<sub>c</sub>, N'<sub>q</sub>, N'<sub>Î³</sub> (dari tabel Terzaghi untuk local shear, berdasarkan Ï† asli).</li>
+                <li>Kohesi modifikasi: <div class="formula">c' = (2/3)·c</div></li>
+                <li>Faktor daya dukung yang digunakan adalah N'<sub>c</sub>, N'<sub>q</sub>, N'<sub>γ</sub> (dari tabel Terzaghi untuk local shear, berdasarkan φ asli).</li>
             </ul>
             <p>Formula daya dukung ultimit (q<sub>ult</sub>) Terzaghi untuk Local Shear:</p>
              <ul>
                 <li><strong>Pondasi Lajur (Strip):</strong> 
-                    <div class="formula">q<sub>ult</sub> = c'Â·N'<sub>c</sub> + qÂ·N'<sub>q</sub> + 0.5Â·Î³<sub>eff</sub>Â·BÂ·N'<sub>Î³</sub></div></li>
+                    <div class="formula">q<sub>ult</sub> = c'·N'<sub>c</sub> + q·N'<sub>q</sub> + 0.5·γ<sub>eff</sub>·B·N'<sub>γ</sub></div></li>
                 <li><strong>Pondasi Bujursangkar (Square):</strong> 
-                    <div class="formula">q<sub>ult</sub> = 0.867Â·c'Â·N'<sub>c</sub> + qÂ·N'<sub>q</sub> + 0.4Â·Î³<sub>eff</sub>Â·BÂ·N'<sub>Î³</sub></div></li>
+                    <div class="formula">q<sub>ult</sub> = 0.867·c'·N'<sub>c</sub> + q·N'<sub>q</sub> + 0.4·γ<sub>eff</sub>·B·N'<sub>γ</sub></div></li>
                 <li><strong>Pondasi Lingkaran (Circular):</strong> 
-                    <div class="formula">q<sub>ult</sub> = 0.867Â·c'Â·N'<sub>c</sub> + qÂ·N'<sub>q</sub> + 0.3Â·Î³<sub>eff</sub>Â·BÂ·N'<sub>Î³</sub></div></li>
+                    <div class="formula">q<sub>ult</sub> = 0.867·c'·N'<sub>c</sub> + q·N'<sub>q</sub> + 0.3·γ<sub>eff</sub>·B·N'<sub>γ</sub></div></li>
             </ul>
         </div>
 
         <div class="modal-section">
             <h4>Pengaruh Muka Air Tanah (MAT)</h4>
-            <p>MAT mempengaruhi tekanan overburden (q) dan berat volume tanah (Î³<sub>eff</sub>) dalam suku ketiga persamaan.</p>
-            <p>Diketahui: D<sub>f</sub> = kedalaman pondasi, D<sub>w</sub> = kedalaman MAT dari permukaan, Î³ = berat volume tanah lembab/di atas MAT, Î³<sub>sat</sub> = berat volume jenuh, Î³<sub>w</sub> = berat volume air.</p>
-            <p>Berat volume apung/efektif tanah: <div class="formula">Î³' = Î³<sub>sat</sub> - Î³<sub>w</sub></div></p>
+            <p>MAT mempengaruhi tekanan overburden (q) dan berat volume tanah (γ<sub>eff</sub>) dalam suku ketiga persamaan.</p>
+            <p>Diketahui: D<sub>f</sub> = kedalaman pondasi, D<sub>w</sub> = kedalaman MAT dari permukaan, γ = berat volume tanah lembab/di atas MAT, γ<sub>sat</sub> = berat volume jenuh, γ<sub>w</sub> = berat volume air.</p>
+            <p>Berat volume apung/efektif tanah: <div class="formula">γ' = γ<sub>sat</sub> - γ<sub>w</sub></div></p>
             
             <h5>Kondisi 1: MAT di atas dasar pondasi (D<sub>w</sub> &lt; D<sub>f</sub>)</h5>
             <ul>
-                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = (Î³ Â· D<sub>w</sub>) + (Î³' Â· (D<sub>f</sub> - D<sub>w</sub>))</div></li>
-                <li>Berat volume untuk suku ke-3: <div class="formula">Î³<sub>eff</sub> = Î³'</div></li>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = (γ · D<sub>w</sub>) + (γ' · (D<sub>f</sub> - D<sub>w</sub>))</div></li>
+                <li>Berat volume untuk suku ke-3: <div class="formula">γ<sub>eff</sub> = γ'</div></li>
             </ul>
 
             <h5>Kondisi 2: MAT tepat di dasar pondasi (D<sub>w</sub> = D<sub>f</sub>)</h5>
             <ul>
-                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = Î³ Â· D<sub>f</sub></div></li>
-                <li>Berat volume untuk suku ke-3: <div class="formula">Î³<sub>eff</sub> = Î³'</div></li>
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = γ · D<sub>f</sub></div></li>
+                <li>Berat volume untuk suku ke-3: <div class="formula">γ<sub>eff</sub> = γ'</div></li>
             </ul>
 
             <h5>Kondisi 3: MAT di bawah dasar pondasi (D<sub>w</sub> &gt; D<sub>f</sub>)</h5>
             <p>Jarak MAT dari dasar pondasi: d = D<sub>w</sub> - D<sub>f</sub></p>
             <ul>
-                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = Î³ Â· D<sub>f</sub></div></li>
-                <li>Berat volume untuk suku ke-3 (Î³<sub>eff</sub>):
+                <li>Tekanan overburden: <div class="formula">q<sub>adj</sub> = γ · D<sub>f</sub></div></li>
+                <li>Berat volume untuk suku ke-3 (γ<sub>eff</sub>):
                     <ul>
-                        <li>Jika d â‰¥ B: <div class="formula">Î³<sub>eff</sub> = Î³</div></li>
-                        <li>Jika d &lt; B: <div class="formula">Î³<sub>eff</sub> = Î³' + (d/B) Â· (Î³ - Î³')</div> (interpolasi linier)</li>
+                        <li>Jika d ≥ B: <div class="formula">γ<sub>eff</sub> = γ</div></li>
+                        <li>Jika d &lt; B: <div class="formula">γ<sub>eff</sub> = γ' + (d/B) · (γ - γ')</div> (interpolasi linier)</li>
                     </ul>
                 </li>
             </ul>
@@ -308,9 +324,6 @@
          <button type="button" onclick="toggleHelpModal()" class="calculate-button" style="width: auto; padding: 0.6rem 1.2rem; margin-top: 1.5rem; float: right;">Tutup</button>
     </div>
 </div>
-
-
-
 
 <!-- External JavaScript -->
 <script src="js/config.js"></script>
