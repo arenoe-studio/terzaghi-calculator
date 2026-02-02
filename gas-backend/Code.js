@@ -204,24 +204,46 @@ function handleLogin() {
       <head>
         <title>Login Success</title>
         <style>
-          body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f8ff; color: #333; }
+          body { font-family: sans-serif; text-align: center; padding: 40px; background: #f4f8ff; color: #333; }
+          .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
           .loader { border: 4px solid #f3f3f3; border-top: 4px solid #0062e6; border-radius: 50%; width: 30px; height: 30px; animation: spin 2s linear infinite; margin: 20px auto; }
           @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+          .btn { display: inline-block; padding: 10px 20px; background: #0062e6; color: white; text-decoration: none; border-radius: 6px; margin-top: 15px; }
         </style>
       </head>
       <body>
-        <h3>Login Berhasil!</h3>
-        <p>Mohon tunggu sebentar, sedang mengalihkan...</p>
-        <div class="loader"></div>
+        <div class="container">
+          <h3>Login Berhasil!</h3>
+          <p>Sedang menghubungkan ke aplikasi...</p>
+          <div class="loader"></div>
+          <p style="font-size: 12px; color: #666;">Jendela ini akan tertutup otomatis.</p>
+          <div id="fallback" style="display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+            <p>Jika jendela tidak tertutup, klik tombol di bawah:</p>
+            <a href="#" class="btn" onclick="window.close()">Tutup Jendela</a>
+          </div>
+        </div>
         <script>
           const data = ${data};
-          // Kirim data ke aplikasi utama
-          if (window.opener) {
-            window.opener.postMessage({ type: 'TERZAGHI_LOGIN_SUCCESS', ...data }, '*');
-            setTimeout(() => window.close(), 1000);
-          } else {
-            document.body.innerHTML = "<h3>Login Berhasil!</h3><p>Anda bisa menutup jendela ini sekarang.</p>";
+          console.log("Sending auth data back to opener...");
+          
+          function sendAndClose() {
+            if (window.opener) {
+              try {
+                window.opener.postMessage({ type: 'TERZAGHI_LOGIN_SUCCESS', ...data }, '*');
+                console.log("Message sent successfully");
+                setTimeout(() => window.close(), 1000);
+              } catch (e) {
+                console.error("Failed to send message:", e);
+                document.getElementById('fallback').style.display = 'block';
+              }
+            } else {
+              console.warn("No opener found");
+              document.body.innerHTML = "<div class='container'><h3>Login Berhasil!</h3><p>Anda bisa menutup jendela ini sekarang.</p><a href='#' class='btn' onclick='window.close()'>Tutup Jendela</a></div>";
+            }
           }
+
+          // Small delay to ensure opener is ready
+          setTimeout(sendAndClose, 500);
         </script>
       </body>
     </html>

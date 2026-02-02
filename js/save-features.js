@@ -43,20 +43,24 @@ function toggleSaveFeature() {
 // AUTHENTICATION FUNCTIONS
 // ============================================================================
 
-// Global state for current sheet URL
+// Global state for current sheet URL and auto-open flag
 let currentSheetUrl = null;
+let openSheetAfterLogin = false;
 
 /**
  * Handle manual button click for opening Google Sheets
  */
 async function handleManualOpenSheet() {
-  if (currentSheetUrl) {
+  console.log("handleManualOpenSheet: currentSheetUrl =", currentSheetUrl);
+  
+  if (currentSheetUrl && currentSheetUrl !== "") {
     window.open(currentSheetUrl, '_blank');
   } else {
     // Check if we have an active session
     const savedEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
     if (!savedEmail) {
       showNotification("Silakan Login dengan Google terlebih dahulu untuk mengakses Spreadsheet.", "warning");
+      openSheetAfterLogin = true;
       loginWithGoogle();
     } else {
       showNotification("Menyiapkan link Spreadsheet, mohon tunggu...", "info");
@@ -64,6 +68,7 @@ async function handleManualOpenSheet() {
       // Try to fetch it again
       try {
         const response = await apiCall(CONFIG.API.GET_USER_INFO);
+        console.log("Manual fetch response:", response);
         if (response.success && response.data.sheetUrl) {
           currentSheetUrl = response.data.sheetUrl;
           window.open(currentSheetUrl, '_blank');
@@ -71,6 +76,7 @@ async function handleManualOpenSheet() {
           showNotification("Gagal mendapatkan link Spreadsheet. Pastikan Anda sudah memberikan izin akses.", "error");
         }
       } catch (error) {
+        console.error("Manual open sheet error:", error);
         showNotification("Terjadi kesalahan koneksi saat mengambil link.", "error");
       }
     }
@@ -89,8 +95,8 @@ function loginWithGoogle() {
     const left = (window.innerWidth / 2) - (width / 2);
     const top = (window.innerHeight / 2) - (height / 2);
     
-    // We append ?action=login to ensure it returns the HTML success page
     const loginUrl = CONFIG.BACKEND_URL + (CONFIG.BACKEND_URL.includes('?') ? '&' : '?') + 'action=login';
+    console.log("Opening login popup:", loginUrl);
     
     const loginWindow = window.open(
         loginUrl, 
@@ -100,6 +106,7 @@ function loginWithGoogle() {
 
     // Listen for message from the popup
     const messageHandler = function(event) {
+        console.log("Received message:", event.data);
         if (event.data && event.data.type === 'TERZAGHI_LOGIN_SUCCESS') {
             const response = event.data;
             if (response.success && response.data.authenticated) {
@@ -108,6 +115,13 @@ function loginWithGoogle() {
                 Storage.set(CONFIG.STORAGE_KEY_USER_NAME, response.data.name);
                 displayUserInfo(response.data);
                 showNotification(CONFIG.MSG.LOGIN_SUCCESS, "success");
+                
+                // Auto-open sheet if requested
+                if (openSheetAfterLogin && response.data.sheetUrl) {
+                  console.log("Auto-opening sheet after login:", response.data.sheetUrl);
+                  window.open(response.data.sheetUrl, '_blank');
+                  openSheetAfterLogin = false;
+                }
             }
             window.removeEventListener('message', messageHandler);
         }
