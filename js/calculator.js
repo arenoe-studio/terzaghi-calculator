@@ -540,4 +540,71 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Placeholders
     updatePlaceholders();
+    
+    // Initialize Result Labels
+    updateResultLabels();
 });
+
+// ============================================================================
+// RESULT LABEL SYNCHRONIZATION
+// ============================================================================
+
+function updateResultLabels() {
+    const stressUnit = document.getElementById('unit_kohesi').value;
+    const densityUnit = document.getElementById('unit_gammaTanah').value;
+    const stressLabel = UNIT_LABELS['stress'][stressUnit];
+    const densityLabel = UNIT_LABELS['density'][densityUnit];
+
+    // Update result unit text spans
+    // This assumes specific order or ID structure. Let's make it robust.
+    // 1. Gamma Effective Results
+    const gammaResIds = ['hasilGammaPrima', 'hasilGammaEff'];
+    gammaResIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.parentElement && el.parentElement.nextElementSibling) {
+            el.parentElement.nextElementSibling.textContent = densityLabel;
+        }
+    });
+
+    // 2. Stress Results (q, c', etc)
+    const stressResIds = ['hasilCprime', 'hasilQadj', 'hasilQult', 'hasilQall'];
+    stressResIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.parentElement && el.parentElement.nextElementSibling) {
+             el.parentElement.nextElementSibling.textContent = stressLabel;
+        }
+    });
+}
+
+// Hook into updateAllUnits
+const originalUpdateAllUnits = updateAllUnits;
+updateAllUnits = function(triggerId) {
+    originalUpdateAllUnits(triggerId);
+    updateResultLabels();
+};
+
+// ============================================================================
+// IMAGE MODAL LOGIC
+// ============================================================================
+
+function openImageModal(src, caption) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('imageModalImg');
+    const cap = document.getElementById('imageModalCaption');
+    
+    if (modal && img && cap) {
+        img.src = src;
+        cap.textContent = caption || '';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+    }
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
