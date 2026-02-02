@@ -311,26 +311,34 @@ function handleGetUserInfo() {
  * @returns {ContentService.TextOutput} JSON response dengan sheet URL
  */
 function handleSaveCalculation(data) {
+  Logger.log("Starting handleSaveCalculation: " + JSON.stringify(data));
   try {
     // Validate data
     if (!validateCalculationData(data)) {
+      Logger.log("Validation failed");
       return createJsonResponse(
         {
           success: false,
-          error: CONFIG.MSG_ERROR_INVALID_DATA,
+          error: CONFIG.MSG_ERROR_INVALID_DATA + ". Check logs.",
         },
         400,
       );
     }
 
     // Get or create user's sheet
+    Logger.log("Getting sheet...");
     const sheet = getOrCreateUserSheet();
+    if (!sheet) {
+      throw new Error("Failed to get sheet object");
+    }
 
     // Prepare row data
     const rowData = prepareRowData(data);
+    Logger.log("Appending row: " + JSON.stringify(rowData));
 
     // Append to sheet
     sheet.appendRow(rowData);
+    Logger.log("Row appended successfully");
 
     // Get sheet URL
     const sheetUrl = sheet.getParent().getUrl();
@@ -341,7 +349,7 @@ function handleSaveCalculation(data) {
       sheetUrl: sheetUrl,
     });
   } catch (error) {
-    Logger.log("handleSaveCalculation error: " + error.toString());
+    Logger.log("handleSaveCalculation CRITICAL error: " + error.toString());
     return createJsonResponse(
       {
         success: false,
@@ -351,6 +359,7 @@ function handleSaveCalculation(data) {
     );
   }
 }
+
 
 /**
  * Get calculation history dari user's Google Sheet
