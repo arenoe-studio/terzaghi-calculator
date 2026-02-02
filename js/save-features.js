@@ -18,26 +18,7 @@
  * - Backend API deployed
  */
 
-// ============================================================================
-// SAVE FEATURE TOGGLE
-// ============================================================================
 
-/**
- * Toggle save feature ON/OFF
- * Shows/hides login section based on toggle state
- */
-function toggleSaveFeature() {
-  const isEnabled = document.getElementById("saveFeatureToggle").checked;
-  Storage.set(CONFIG.STORAGE_KEY_SAVE_ENABLED, isEnabled);
-
-  if (isEnabled) {
-    document.getElementById("loginSection").classList.add("active");
-    checkAuthStatus(); // Check if already logged in
-  } else {
-    document.getElementById("loginSection").classList.remove("active");
-    document.getElementById("saveSection").classList.remove("active");
-  }
-}
 
 // ============================================================================
 // AUTHENTICATION FUNCTIONS
@@ -452,17 +433,8 @@ function showLoading(show) {
  * Run when DOM is ready
  */
 document.addEventListener("DOMContentLoaded", function () {
-  // Load saved toggle preference
-  const savedToggle = Storage.get(CONFIG.STORAGE_KEY_SAVE_ENABLED, false);
-  const toggleElement = document.getElementById("saveFeatureToggle");
-
-  if (toggleElement) {
-    toggleElement.checked = savedToggle;
-
-    if (savedToggle) {
-      toggleSaveFeature();
-    }
-  }
+  // Always check auth status on load
+  checkAuthStatus();
 
   // Initialize the direct sheet link
   initOpenSheetLink();
