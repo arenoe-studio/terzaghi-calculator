@@ -142,6 +142,13 @@ function doPost(e) {
 
     // Router berdasarkan action
     switch (action) {
+      case "getUserInfo":
+        return handleGetUserInfo();
+
+      case "getHistory":
+        const limit = parseInt(payload.limit) || CONFIG.MAX_HISTORY_ITEMS;
+        return handleGetHistory(limit);
+
       case "save":
         return handleSaveCalculation(payload.data);
 
