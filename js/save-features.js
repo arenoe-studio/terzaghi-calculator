@@ -181,6 +181,14 @@ async function checkAuthStatus() {
  */
 async function saveCalculationToSheet() {
   try {
+    // Check login status first
+    const userEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
+    if (!userEmail) {
+        showNotification("Anda belum login. Silakan login dengan Google terlebih dahulu.", "warning");
+        loginWithGoogle();
+        return;
+    }
+
     // Check if calculation has been done
     const qult = document.getElementById("hasilQult").textContent;
     if (!qult || qult === "-") {
@@ -423,13 +431,12 @@ function checkForSaveCondition() {
   
   console.log(`[SaveCheck] User: ${userEmail ? 'Logged In' : 'Guest'}, Result: ${qultVal}`);
   
-  if (userEmail && qultVal && qultVal !== "-") {
+  // Show save section as long as there is a result
+  if (qultVal && qultVal !== "-") {
     document.getElementById("saveSection").classList.add("active");
-    console.log("[SaveCheck] ✅ Save section ACTIVATED");
+    console.log("[SaveCheck] ✅ Save section ACTIVATED (User logic handled in button click)");
   } else {
-    // Debug info why it's not showing
-    if (!userEmail) console.log("[SaveCheck] ❌ Not showing save: User not logged in");
-    else if (!qultVal || qultVal === "-") console.log("[SaveCheck] ❌ Not showing save: No result value");
+    console.log("[SaveCheck] ❌ Not showing save: No result value");
   }
 }
 

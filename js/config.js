@@ -57,6 +57,55 @@ const CONFIG = {
     VERSION: '2.1'
 };
 
+// ============================================================================
+// STORAGE UTILITY
+// ============================================================================
+
+/**
+ * Storage wrapper to handle localStorage safely
+ */
+const Storage = {
+    /**
+     * Set item in localStorage
+     */
+    set: function(key, value) {
+        try {
+            if (value === null || value === undefined) {
+                localStorage.removeItem(key);
+            } else {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
+        } catch (e) {
+            console.error('Storage set error:', e);
+        }
+    },
+    
+    /**
+     * Get item from localStorage
+     */
+    get: function(key, defaultValue = null) {
+        try {
+            const item = localStorage.getItem(key);
+            if (item === null) return defaultValue;
+            return JSON.parse(item);
+        } catch (e) {
+            console.error('Storage get error:', e);
+            return defaultValue;
+        }
+    },
+    
+    /**
+     * Remove item from localStorage
+     */
+    remove: function(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (e) {
+            console.error('Storage remove error:', e);
+        }
+    }
+};
+
 /**
  * Validate configuration saat page load
  * Ensures critical config tidak missing
