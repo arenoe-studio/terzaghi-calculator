@@ -28,39 +28,6 @@
 
 <div class="calculator-container">
     <h2 class="main-title">Analisis Daya Dukung Pondasi Dangkal<br>(Terzaghi)</h2>
-    <div id="messageArea" class="mb-6"></div>
-    
-    <!-- Login Section - Shows when save toggle is ON -->
-    <div id="loginSection" class="login-section">
-        <div class="login-content">
-            <!-- Not logged in state -->
-            <div id="loginPrompt" class="login-info">
-                <h4>💾 Simpan Riwayat Perhitungan</h4>
-                <p style="margin: 0; font-size: 0.9rem; color: #566573;">
-                    Login dengan Google untuk menyimpan perhitungan Anda ke Google Sheets pribadi.
-                </p>
-            </div>
-            
-            <!-- Logged in state (hidden by default) -->
-            <div id="userInfo" class="login-info" style="display: none;">
-                <h4>Selamat datang!</h4>
-                <p class="user-email" id="userEmail">-</p>
-                <span class="privacy-badge">
-                    <span>🔒</span> Data tersimpan di Drive Anda
-                </span>
-            </div>
-            
-            <!-- Login/Logout button -->
-            <div>
-                <button id="loginButton" class="login-button" onclick="loginWithGoogle()">
-                    Login dengan Google
-                </button>
-                <button id="logoutButton" class="logout-button" onclick="handleLogout()" style="display: none;">
-                    Logout
-                </button>
-            </div>
-        </div>
-    </div>
     
     <!-- Input Fields -->
     <div class="section-title">Parameter Dasar Pondasi & Tanah</div>
@@ -91,7 +58,7 @@
             <label for="kohesi">Kohesi Tanah (c):</label>
             <div class="flex items-center">
                 <input type="number" id="kohesi" step="any" class="input-field" placeholder="e.g., 0.1">
-                <select id="unit_kohesi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                <select id="unit_kohesi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;" onchange="updateAllUnits(this.id)">
                     <option value="kgcm2">kg/cm²</option>
                     <option value="tonm2">Ton/m²</option>
                     <option value="knm2">kN/m²</option>
@@ -109,7 +76,7 @@
             <label for="gammaTanah">Berat Vol. Tanah (γ) (di atas MAT/lembab):</label>
             <div class="flex items-center">
                 <input type="number" id="gammaTanah" step="any" class="input-field" placeholder="e.g., 0.0018">
-                <select id="unit_gammaTanah" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                <select id="unit_gammaTanah" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;" onchange="updateAllUnits(this.id)">
                     <option value="kgcm3">kg/cm³</option>
                     <option value="tonm3">Ton/m³</option>
                     <option value="knm3">kN/m³</option>
@@ -120,7 +87,7 @@
             <label for="lebarPondasi">Lebar/Diameter Pondasi (B):</label>
             <div class="flex items-center">
                 <input type="number" id="lebarPondasi" step="any" class="input-field" placeholder="e.g., 1.5">
-                <select id="unit_lebarPondasi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                <select id="unit_lebarPondasi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;" onchange="updateAllUnits(this.id)">
                     <option value="m">meter</option>
                     <option value="cm">cm</option>
                 </select>
@@ -130,7 +97,7 @@
             <label for="kedalamanPondasi">Kedalaman Dasar Pondasi (Df):</label>
             <div class="flex items-center">
                 <input type="number" id="kedalamanPondasi" step="any" class="input-field" placeholder="e.g., 1.0">
-                <select id="unit_kedalamanPondasi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                <select id="unit_kedalamanPondasi" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;" onchange="updateAllUnits(this.id)">
                     <option value="m">meter</option>
                     <option value="cm">cm</option>
                 </select>
@@ -157,7 +124,7 @@
             <label for="kedalamanMAT">Kedalaman MAT dari Permukaan (Dw):</label>
             <div class="flex items-center">
                 <input type="number" id="kedalamanMAT" step="any" class="input-field" placeholder="e.g., 2.0 atau kosong jika tidak ada pengaruh MAT">
-                <select id="unit_kedalamanMAT" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;">
+                <select id="unit_kedalamanMAT" class="unit-select input-field" style="width:auto; margin-left:0.5rem; padding:0.5rem;" onchange="updateAllUnits(this.id)">
                     <option value="m">meter</option>
                     <option value="cm">cm</option>
                 </select>
@@ -188,6 +155,40 @@
     </div>
 
     <button type="button" onclick="hitungDayaDukung()" class="calculate-button">Hitung Daya Dukung</button>
+
+    <div id="messageArea" class="mt-4 mb-4"></div>
+    
+    <!-- Login Section - Shows when save toggle is ON -->
+    <div id="loginSection" class="login-section mt-4 mb-4">
+        <div class="login-content">
+            <!-- Not logged in state -->
+            <div id="loginPrompt" class="login-info">
+                <h4>💾 Simpan Riwayat Perhitungan</h4>
+                <p style="margin: 0; font-size: 0.9rem; color: #566573;">
+                    Login dengan Google untuk menyimpan perhitungan Anda ke Google Sheets pribadi.
+                </p>
+            </div>
+            
+            <!-- Logged in state (hidden by default) -->
+            <div id="userInfo" class="login-info" style="display: none;">
+                <h4>Selamat datang!</h4>
+                <p class="user-email" id="userEmail">-</p>
+                <span class="privacy-badge">
+                    <span>🔒</span> Data tersimpan di Drive Anda
+                </span>
+            </div>
+            
+            <!-- Login/Logout button -->
+            <div>
+                <button id="loginButton" class="login-button" onclick="loginWithGoogle()">
+                    Login dengan Google
+                </button>
+                <button id="logoutButton" class="logout-button" onclick="handleLogout()" style="display: none;">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="results-container">
         <h3>Hasil Perhitungan:</h3>
@@ -358,10 +359,39 @@
 </div>
 
 <!-- External JavaScript -->
+<script src="js/utils.js"></script>
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/calculator.js"></script>
 <script src="js/save-features.js"></script>
+
+<!-- History Modal -->
+<div id="historyModal" class="history-modal" onclick="closeHistoryModal(event)">
+    <div class="history-content" onclick="event.stopPropagation()">
+        <div class="history-header">
+            <h3>📋 Riwayat Perhitungan</h3>
+            <button class="history-close-button" onclick="closeHistoryModal()">×</button>
+        </div>
+        <div class="history-body">
+            <div id="historyLoading" style="display: none; text-align: center; padding: 2rem;">
+                <div style="display: inline-block; border: 3px solid #f3f3f3; border-top: 3px solid #0062e6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 1rem; color: #7f8c8d;">Memuat riwayat...</p>
+            </div>
+            <div id="historyEmpty" class="history-empty" style="display: none;">
+                <p>📭 Belum ada perhitungan yang disimpan.</p>
+                <p style="font-size: 0.9rem; color: #95a5a6;">
+                    Lakukan perhitungan dan klik "Simpan ke Google Sheet" untuk menyimpan.
+                </p>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
 
 </body>
 </html>
