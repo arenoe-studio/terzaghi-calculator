@@ -101,6 +101,9 @@ function doGet(e) {
       case "getUserInfo":
         return handleGetUserInfo();
 
+      case "login":
+        return handleLogin();
+
       case "getHistory":
         const limit = parseInt(e.parameter.limit) || CONFIG.MAX_HISTORY_ITEMS;
         return handleGetHistory(limit);
@@ -179,6 +182,54 @@ function doPost(e) {
 // ============================================================================
 // API HANDLERS
 // ============================================================================
+
+/**
+ * Menangani login flow via popup
+ * Mengembalikan HTML yang akan mengirimkan data ke window.opener via postMessage
+ */
+function handleLogin() {
+  const userInfo = getCurrentUserInfo();
+  const data = JSON.stringify({
+    success: true,
+    data: {
+      ...userInfo,
+      sheetUrl: getUserSheetUrl()
+    }
+  });
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Login Success</title>
+        <style>
+          body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f8ff; color: #333; }
+          .loader { border: 4px solid #f3f3f3; border-top: 4px solid #0062e6; border-radius: 50%; width: 30px; height: 30px; animation: spin 2s linear infinite; margin: 20px auto; }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        </style>
+      </head>
+      <body>
+        <h3>Login Berhasil!</h3>
+        <p>Mohon tunggu sebentar, sedang mengalihkan...</p>
+        <div class="loader"></div>
+        <script>
+          const data = ${data};
+          // Kirim data ke aplikasi utama
+          if (window.opener) {
+            window.opener.postMessage({ type: 'TERZAGHI_LOGIN_SUCCESS', ...data }, '*');
+            setTimeout(() => window.close(), 1000);
+          } else {
+            document.body.innerHTML = "<h3>Login Berhasil!</h3><p>Anda bisa menutup jendela ini sekarang.</p>";
+          }
+        </script>
+      </body>
+    </html>
+  `;
+  
+  return HtmlService.createHtmlOutput(html)
+    .setTitle("Login Success - Terzaghi Calculator")
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
 
 /**
  * Get information tentang user yang sedang login

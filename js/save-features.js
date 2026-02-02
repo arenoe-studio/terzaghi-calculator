@@ -47,46 +47,55 @@ function toggleSaveFeature() {
  * Login dengan Google OAuth
  * Opens backend URL yang akan trigger OAuth consent
  */
-async function loginWithGoogle() {
+/**
+ * Login dengan Google OAuth via Popup
+ */
+function loginWithGoogle() {
   try {
     showNotification("Membuka jendela login Google...", "info");
     
-    // Open backend URL in a popup
+    // Open backend URL with action=login in a popup
     const width = 600, height = 700;
     const left = (window.innerWidth / 2) - (width / 2);
     const top = (window.innerHeight / 2) - (height / 2);
     
+    // We append ?action=login to ensure it returns the HTML success page
+    const loginUrl = CONFIG.BACKEND_URL + (CONFIG.BACKEND_URL.includes('?') ? '&' : '?') + 'action=login';
+    
     const loginWindow = window.open(
-        CONFIG.BACKEND_URL, 
+        loginUrl, 
         'GoogleLogin', 
         `width=${width},height=${height},left=${left},top=${top}`
     );
 
-    // Poll for window closure
-    const timer = setInterval(async () => {
+    // Listen for message from the popup
+    const messageHandler = function(event) {
+        // Validation could be added here (e.g., check event.origin)
+        if (event.data && event.data.type === 'TERZAGHI_LOGIN_SUCCESS') {
+            const response = event.data;
+            if (response.success && response.data.authenticated) {
+                // Save and Update UI
+                Storage.set(CONFIG.STORAGE_KEY_USER_EMAIL, response.data.email);
+                Storage.set(CONFIG.STORAGE_KEY_USER_NAME, response.data.name);
+                displayUserInfo(response.data);
+                showNotification(CONFIG.MSG.LOGIN_SUCCESS, "success");
+            }
+            window.removeEventListener('message', messageHandler);
+        }
+    };
+
+    window.addEventListener('message', messageHandler);
+
+    // Backup: Poll for window closure to clean up listener if user cancels
+    const timer = setInterval(() => {
         if (!loginWindow || loginWindow.closed) {
             clearInterval(timer);
-            showLoading(true);
-            try {
-                // Verify status after login window closed
-                const response = await apiCall(CONFIG.API.GET_USER_INFO);
-                if (response.success && response.data.authenticated) {
-                    Storage.set(CONFIG.STORAGE_KEY_USER_EMAIL, response.data.email);
-                    Storage.set(CONFIG.STORAGE_KEY_USER_NAME, response.data.name);
-                    displayUserInfo(response.data);
-                    showNotification(CONFIG.MSG.LOGIN_SUCCESS, "success");
-                } else {
-                    showNotification("Login belum selesai atau gagal.", "warning");
-                }
-            } catch (error) {
-                console.error("Post-login status check error:", error);
-            }
-            showLoading(false);
+            // Wait a bit then remove listener in case it hasn't fired
+            setTimeout(() => window.removeEventListener('message', messageHandler), 2000);
         }
     }, 1000);
 
   } catch (error) {
-    showLoading(false);
     console.error("Login trigger error:", error);
     showNotification("Login gagal dipicu: " + error.message, "error");
   }
@@ -117,11 +126,21 @@ function handleLogout() {
  * Display user info after successful login
  */
 function displayUserInfo(userInfo) {
-  document.getElementById("loginPrompt").style.display = "none";
-  document.getElementById("userInfo").style.display = "block";
-  document.getElementById("userEmail").textContent = userInfo.email;
-  document.getElementById("loginButton").style.display = "none";
-  document.getElementById("logoutButton").style.display = "inline-block";
+  // Hide login elements
+  const loginPrompt = document.getElementById("loginPrompt");
+  const loginButton = document.getElementById("loginButton");
+  
+  if (loginPrompt) loginPrompt.style.display = "none";
+  if (loginButton) loginButton.style.display = "none";
+
+  // Show user info
+  const userInfoDiv = document.getElementById("userInfo");
+  const userEmail = document.getElementById("userEmail");
+  const logoutButton = document.getElementById("logoutButton");
+
+  if (userInfoDiv) userInfoDiv.style.display = "block";
+  if (userEmail) userEmail.textContent = userInfo.email;
+  if (logoutButton) logoutButton.style.display = "inline-block";
 
   // Handle Google Sheet Button
   const openSheetBtn = document.getElementById("openSheetButton");
@@ -133,7 +152,8 @@ function displayUserInfo(userInfo) {
   // Show save section if calculation has results
   const qult = document.getElementById("hasilQult");
   if (qult && qult.textContent && qult.textContent !== "-") {
-    document.getElementById("saveSection").classList.add("active");
+    const saveSection = document.getElementById("saveSection");
+    if (saveSection) saveSection.classList.add("active");
   }
 }
 
@@ -151,19 +171,11 @@ async function checkAuthStatus() {
       email: savedEmail,
       name: savedName || "User",
       authenticated: true,
+      // We don't have sheetUrl here, but it will be updated if they save or re-login
     });
 
-    // Verify with backend in background
-    try {
-      const response = await apiCall(CONFIG.API.GET_USER_INFO);
-      if (!response.success || !response.data.authenticated) {
-        // Session expired
-        handleLogout();
-      }
-    } catch (error) {
-      // Network error, keep cached session
-      console.log("Could not verify auth status:", error);
-    }
+    // Verification via Fetch is unreliable cross-origin without tokens
+    // So we primarily rely on the LocalStorage session for UI state
   }
 }
 
