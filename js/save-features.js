@@ -43,10 +43,29 @@ function toggleSaveFeature() {
 // AUTHENTICATION FUNCTIONS
 // ============================================================================
 
+// Global state for current sheet URL
+let currentSheetUrl = null;
+
 /**
- * Login dengan Google OAuth
- * Opens backend URL yang akan trigger OAuth consent
+ * Handle manual button click for opening Google Sheets
  */
+function handleManualOpenSheet() {
+  if (currentSheetUrl) {
+    window.open(currentSheetUrl, '_blank');
+  } else {
+    // Check if we have an active session
+    const savedEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
+    if (!savedEmail) {
+      showNotification("Silakan Login dengan Google terlebih dahulu untuk mengakses Spreadsheet.", "warning");
+      loginWithGoogle();
+    } else {
+      showNotification("Menyiapkan link Spreadsheet, mohon tunggu...", "info");
+      // Try to fetch it again
+      checkAuthStatus();
+    }
+  }
+}
+
 /**
  * Login dengan Google OAuth via Popup
  */
@@ -70,7 +89,6 @@ function loginWithGoogle() {
 
     // Listen for message from the popup
     const messageHandler = function(event) {
-        // Validation could be added here (e.g., check event.origin)
         if (event.data && event.data.type === 'TERZAGHI_LOGIN_SUCCESS') {
             const response = event.data;
             if (response.success && response.data.authenticated) {
@@ -86,11 +104,9 @@ function loginWithGoogle() {
 
     window.addEventListener('message', messageHandler);
 
-    // Backup: Poll for window closure to clean up listener if user cancels
     const timer = setInterval(() => {
         if (!loginWindow || loginWindow.closed) {
             clearInterval(timer);
-            // Wait a bit then remove listener in case it hasn't fired
             setTimeout(() => window.removeEventListener('message', messageHandler), 2000);
         }
     }, 1000);
@@ -108,6 +124,7 @@ function handleLogout() {
   // Clear localStorage
   Storage.remove(CONFIG.STORAGE_KEY_USER_EMAIL);
   Storage.remove(CONFIG.STORAGE_KEY_USER_NAME);
+  currentSheetUrl = null;
 
   // Reset UI to logged-out state
   document.getElementById("loginPrompt").style.display = "block";
@@ -116,9 +133,6 @@ function handleLogout() {
   document.getElementById("logoutButton").style.display = "none";
   document.getElementById("saveSection").classList.remove("active");
   
-  const openSheetBtn = document.getElementById("openSheetButton");
-  if (openSheetBtn) openSheetBtn.style.display = "none";
-
   showNotification(CONFIG.MSG.LOGOUT_SUCCESS, "info");
 }
 
@@ -126,32 +140,23 @@ function handleLogout() {
  * Display user info after successful login
  */
 function displayUserInfo(userInfo) {
-  // Hide login elements
-  const loginPrompt = document.getElementById("loginPrompt");
-  const loginButton = document.getElementById("loginButton");
-  
-  if (loginPrompt) loginPrompt.style.display = "none";
-  if (loginButton) loginButton.style.display = "none";
-
-  // Show user info
-  const userInfoDiv = document.getElementById("userInfo");
-  const userEmail = document.getElementById("userEmail");
-  const logoutButton = document.getElementById("logoutButton");
-
-  if (userInfoDiv) userInfoDiv.style.display = "block";
-  if (userEmail) userEmail.textContent = userInfo.email;
-  if (logoutButton) logoutButton.style.display = "inline-block";
-
-  // Handle Google Sheet Button
-  const openSheetBtn = document.getElementById("openSheetButton");
-  if (openSheetBtn) {
-    if (userInfo.sheetUrl && userInfo.sheetUrl !== "") {
-      openSheetBtn.href = userInfo.sheetUrl;
-      openSheetBtn.style.setProperty("display", "flex", "important");
-    } else {
-      openSheetBtn.style.display = "none";
-    }
+  // Update Global URL
+  if (userInfo.sheetUrl) {
+    currentSheetUrl = userInfo.sheetUrl;
   }
+
+  // Hide/Show elements based on login state
+  const loginPrompt = document.getElementById("loginPrompt");
+  const userInfoDiv = document.getElementById("userInfo");
+  const loginButton = document.getElementById("loginButton");
+  const logoutButton = document.getElementById("logoutButton");
+  const userEmail = document.getElementById("userEmail");
+
+  if (loginPrompt) loginPrompt.style.display = "none";
+  if (userInfoDiv) userInfoDiv.style.display = "block";
+  if (loginButton) loginButton.style.display = "none";
+  if (logoutButton) logoutButton.style.display = "inline-block";
+  if (userEmail) userEmail.textContent = userInfo.email;
 
   // Show save section if calculation has results
   const qult = document.getElementById("hasilQult");
@@ -181,10 +186,8 @@ async function checkAuthStatus() {
     try {
       const response = await apiCall(CONFIG.API.GET_USER_INFO);
       if (response.success && response.data.authenticated) {
-        // Update with fresh data (this will show the sheet button if available)
         displayUserInfo(response.data);
       } else {
-        // Session might have expired on server side
         handleLogout();
       }
     } catch (error) {
