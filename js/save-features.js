@@ -49,7 +49,7 @@ let currentSheetUrl = null;
 /**
  * Handle manual button click for opening Google Sheets
  */
-function handleManualOpenSheet() {
+async function handleManualOpenSheet() {
   if (currentSheetUrl) {
     window.open(currentSheetUrl, '_blank');
   } else {
@@ -60,8 +60,19 @@ function handleManualOpenSheet() {
       loginWithGoogle();
     } else {
       showNotification("Menyiapkan link Spreadsheet, mohon tunggu...", "info");
+      
       // Try to fetch it again
-      checkAuthStatus();
+      try {
+        const response = await apiCall(CONFIG.API.GET_USER_INFO);
+        if (response.success && response.data.sheetUrl) {
+          currentSheetUrl = response.data.sheetUrl;
+          window.open(currentSheetUrl, '_blank');
+        } else {
+          showNotification("Gagal mendapatkan link Spreadsheet. Pastikan Anda sudah memberikan izin akses.", "error");
+        }
+      } catch (error) {
+        showNotification("Terjadi kesalahan koneksi saat mengambil link.", "error");
+      }
     }
   }
 }
@@ -251,6 +262,11 @@ async function saveCalculationToSheet() {
     showLoading(false);
 
     if (response.success) {
+      // Update global sheet URL if returned from save
+      if (response.sheetUrl) {
+        currentSheetUrl = response.sheetUrl;
+      }
+
       const message = response.sheetUrl
         ? `${CONFIG.MSG.SAVE_SUCCESS} <a href="${response.sheetUrl}" target="_blank" style="color: #0062e6; text-decoration: underline;">Buka Sheet →</a>`
         : CONFIG.MSG.SAVE_SUCCESS;
