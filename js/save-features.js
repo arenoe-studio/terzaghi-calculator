@@ -165,9 +165,13 @@ function handleLogout() {
  * Display user info after successful login
  */
 function displayUserInfo(userInfo) {
+  console.log("displayUserInfo called with:", userInfo);
   // Update Global URL
-  if (userInfo.sheetUrl) {
+  if (userInfo && typeof userInfo.sheetUrl !== 'undefined') {
     currentSheetUrl = userInfo.sheetUrl;
+    console.log("Global currentSheetUrl updated to:", currentSheetUrl);
+  } else {
+    console.warn("displayUserInfo: userInfo.sheetUrl is missing");
   }
 
   // Hide/Show elements based on login state

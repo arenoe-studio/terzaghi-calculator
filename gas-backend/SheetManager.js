@@ -33,41 +33,47 @@
  * @throws {Error} Jika user tidak authenticated atau sheet creation gagal
  */
 function getOrCreateUserSheet() {
+  const userEmail = getCurrentUserEmail();
+  if (!userEmail) {
+    Logger.log("getOrCreateUserSheet: User email is null or empty");
+    return null;
+  }
+
+  const sheetName = CONFIG.SHEET_NAME_PREFIX + userEmail;
+  Logger.log("Starting sheet acquisition for: " + sheetName);
+
   try {
-    const userEmail = getCurrentUserEmail();
-    if (!userEmail) {
-      Logger.log("getOrCreateUserSheet: No user email found");
-      return null;
-    }
-
-    const sheetName = CONFIG.SHEET_NAME_PREFIX + userEmail;
-    Logger.log("Searching for sheet: " + sheetName);
-
+    // 1. Try to find existing
     let spreadsheet = findSpreadsheetByName(sheetName);
-
-    if (!spreadsheet) {
-      Logger.log("Sheet not found by name, creating a new one...");
+    
+    if (spreadsheet) {
+      Logger.log("Existing spreadsheet found: " + spreadsheet.getId());
+    } else {
+      // 2. Create if not found
+      Logger.log("Spreadsheet not found, creating new one...");
       spreadsheet = createNewSpreadsheet(sheetName);
+      if (!spreadsheet) {
+        throw new Error("Creation returned null");
+      }
     }
 
-    if (!spreadsheet) {
-      Logger.log("CRITICAL: Failed to create or find spreadsheet");
-      return null;
-    }
-
+    // 3. Get or create the 'Calculations' tab
     let sheet = spreadsheet.getSheetByName(CONFIG.SHEET_TAB_NAME);
     if (!sheet) {
-      Logger.log("Calculations tab not found, inserting new one...");
+      Logger.log("Tab '" + CONFIG.SHEET_TAB_NAME + "' not found, creating it.");
       sheet = spreadsheet.insertSheet(CONFIG.SHEET_TAB_NAME);
       setupSheetHeaders(sheet);
       formatSheet(sheet);
     }
 
+    // 4. Final validation before returning
     validateSheetStructure(sheet);
     return sheet;
+
   } catch (error) {
-    Logger.log("getOrCreateUserSheet ERROR: " + error.toString());
-    return null;
+    Logger.log("CRITICAL ERROR in getOrCreateUserSheet: " + error.toString());
+    // Rethrow so the caller knows failure happened
+    throw error;
   }
 }
 
@@ -248,7 +254,13 @@ function validateSheetStructure(sheet) {
 function getUserSheetUrl() {
   try {
     const sheet = getOrCreateUserSheet();
-    return sheet.getParent().getUrl();
+    if (!sheet) {
+      Logger.log("getUserSheetUrl: getOrCreateUserSheet returned null");
+      return "";
+    }
+    const url = sheet.getParent().getUrl();
+    Logger.log("getUserSheetUrl: Success. URL: " + url);
+    return url;
   } catch (error) {
     Logger.log("getUserSheetUrl error: " + error.toString());
     return "";

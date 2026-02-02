@@ -276,13 +276,19 @@ function handleGetUserInfo() {
     const sheetUrl = getUserSheetUrl();
     Logger.log("Returning user info for " + userInfo.email + " with sheetUrl: " + sheetUrl);
 
-    return createJsonResponse({
+    const result = {
       success: true,
       data: {
         ...userInfo,
         sheetUrl: sheetUrl || "" 
-      },
-    });
+      }
+    };
+
+    if (!sheetUrl) {
+      result.message = "Sheet URL could not be retrieved. Check backend logs.";
+    }
+
+    return createJsonResponse(result);
   } catch (error) {
     Logger.log("handleGetUserInfo error: " + error.toString());
     return createJsonResponse(
