@@ -108,6 +108,9 @@ function doGet(e) {
         const limit = parseInt(e.parameter.limit) || CONFIG.MAX_HISTORY_ITEMS;
         return handleGetHistory(limit);
 
+      case "openSheet":
+        return handleOpenSheetRedirect();
+
       default:
         return createJsonResponse(
           {
@@ -569,6 +572,49 @@ function prepareRowData(data) {
     parseFloat(data.qult),
     parseFloat(data.qall),
   ];
+}
+
+// ============================================================================
+// REDIRECT HANDLER
+// ============================================================================
+
+/**
+ * Handle direct redirect to the user's spreadsheet
+ * Used to avoid popup blockers and CORS issues for opening sheets.
+ */
+function handleOpenSheetRedirect() {
+  try {
+    const url = getUserSheetUrl();
+    if (!url || url === "") {
+      return HtmlService.createHtmlOutput(`
+        <html>
+          <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+            <h3 style="color: #d32f2f;">Spreadsheet Tidak Ditemukan</h3>
+            <p>Aplikasi belum bisa menemukan Spreadsheet Anda.</p>
+            <p>Silakan kembali ke kalkulator dan pastikan Anda sudah <b>Login</b>.</p>
+            <br>
+            <button onclick="window.close()" style="padding: 10px 20px;">Tutup Jendela</button>
+          </body>
+        </html>
+      `).setTitle("Sheet Not Found");
+    }
+    
+    return HtmlService.createHtmlOutput(`
+      <html>
+        <head>
+          <title>Membuka Spreadsheet...</title>
+          <meta http-equiv="refresh" content="0; url=${url}">
+        </head>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h3>Sedang Mengalihkan...</h3>
+          <p>Membuka Spreadsheet Anda. Jika tidak terbuka otomatis, <a href="${url}">klik di sini</a>.</p>
+          <script>window.location.href = "${url}";</script>
+        </body>
+      </html>
+    `).setTitle("Opening Spreadsheet");
+  } catch (error) {
+    return HtmlService.createHtmlOutput("Error: " + error.toString());
+  }
 }
 
 // ============================================================================

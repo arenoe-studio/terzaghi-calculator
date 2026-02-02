@@ -45,41 +45,14 @@ function toggleSaveFeature() {
 
 // Global state for current sheet URL and auto-open flag
 let currentSheetUrl = null;
-let openSheetAfterLogin = false;
 
-/**
- * Handle manual button click for opening Google Sheets
- */
-async function handleManualOpenSheet() {
-  console.log("handleManualOpenSheet: currentSheetUrl =", currentSheetUrl);
-  
-  if (currentSheetUrl && currentSheetUrl !== "") {
-    window.open(currentSheetUrl, '_blank');
-  } else {
-    // Check if we have an active session
-    const savedEmail = Storage.get(CONFIG.STORAGE_KEY_USER_EMAIL);
-    if (!savedEmail) {
-      showNotification("Silakan Login dengan Google terlebih dahulu untuk mengakses Spreadsheet.", "warning");
-      openSheetAfterLogin = true;
-      loginWithGoogle();
-    } else {
-      showNotification("Menyiapkan link Spreadsheet, mohon tunggu...", "info");
-      
-      // Try to fetch it again
-      try {
-        const response = await apiCall(CONFIG.API.GET_USER_INFO);
-        console.log("Manual fetch response:", response);
-        if (response.success && response.data.sheetUrl) {
-          currentSheetUrl = response.data.sheetUrl;
-          window.open(currentSheetUrl, '_blank');
-        } else {
-          showNotification("Gagal mendapatkan link Spreadsheet. Pastikan Anda sudah memberikan izin akses.", "error");
-        }
-      } catch (error) {
-        console.error("Manual open sheet error:", error);
-        showNotification("Terjadi kesalahan koneksi saat mengambil link.", "error");
-      }
-    }
+// Initialize the direct redirect link for the sheet button
+function initOpenSheetLink() {
+  const btn = document.getElementById('openSheetButtonStatic');
+  if (btn) {
+    const redirectUrl = CONFIG.BACKEND_URL + (CONFIG.BACKEND_URL.includes('?') ? '&' : '?') + 'action=openSheet';
+    btn.href = redirectUrl;
+    console.log("Direct open sheet link initialized:", redirectUrl);
   }
 }
 
@@ -115,13 +88,6 @@ function loginWithGoogle() {
                 Storage.set(CONFIG.STORAGE_KEY_USER_NAME, response.data.name);
                 displayUserInfo(response.data);
                 showNotification(CONFIG.MSG.LOGIN_SUCCESS, "success");
-                
-                // Auto-open sheet if requested
-                if (openSheetAfterLogin && response.data.sheetUrl) {
-                  console.log("Auto-opening sheet after login:", response.data.sheetUrl);
-                  window.open(response.data.sheetUrl, '_blank');
-                  openSheetAfterLogin = false;
-                }
             }
             window.removeEventListener('message', messageHandler);
         }
@@ -497,6 +463,9 @@ document.addEventListener("DOMContentLoaded", function () {
       toggleSaveFeature();
     }
   }
+
+  // Initialize the direct sheet link
+  initOpenSheetLink();
 
   // Validate config
   const isValid = validateConfig();
